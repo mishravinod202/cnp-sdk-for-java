@@ -1,5 +1,8 @@
 = Vantiv eCommerce CNP CHANGELOG
 
+==Version 12.37.4_17 (v12.37.4_17)(July 29, 2024)
+* Change: [cnpAPI v12.37.4_17] Change: Removed Glassfish Package-Jaxb-Core duplicate dependency which supports Jakarta namespace.
+
 ==Version 12.37.3_17 (v12.37.3_17)(July 23, 2024)
 * Change: [cnpAPI v12.37.3_17] Change: Removed Jaxb-Core duplicate dependency which supports Jakarta namespace.
 
