@@ -7,30 +7,45 @@ apply plugin : 'maven-publish'
 group = 'io.github.vantiv'
 version = JAR_VERSION
 
+ext.xjcGeneratedDir = "$buildDir/generated/sources/xjc/main/java"
+
+// ---- Java toolchain + Java 17 baseline bytecode (runs on 17 through 21) ----
+allprojects {
+    plugins.withId('java') {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(21)
+            }
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
+        }
+
+        // Use the Java 17 API surface to keep artifacts compatible with Java 17+ runtimes.
+        tasks.withType(JavaCompile).configureEach {
+            options.release = 17
+        }
+    }
+}
+
+
 repositories {
     maven  {
-        url "http://repo1.maven.org/maven2"
+        url = "http://repo1.maven.org/maven2"
     }
 }
 
 configurations {
-    all{
+    all {
         resolutionStrategy {
         }
     }
-    functionalTestImplementation.extendsFrom testImplementation
-    functionalTestRuntimeOnly.extendsFrom runtimeOnly
-    
-    certificationTestImplementation.extendsFrom functionalTestImplementation
-    certificationTestRuntimeOnly.extendsFrom functionalTestRuntimeOnly
-    
     generateJAXB.extendsFrom mainRuntime
 }
 
 sourceSets {
     main{
         java{
-            srcDirs += "$buildDir/generated"
+            srcDirs += xjcGeneratedDir
         }
     }
     functionalTest {
@@ -47,25 +62,48 @@ sourceSets {
     }
 }
 
-dependencies{
-    implementation group: 'com.jcraft', name: 'jsch', version: '0.1.55'
-    implementation group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.3.0'
-    implementation group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.4'
-    implementation group: 'commons-io', name: 'commons-io', version: '2.18.0'
-    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
-    implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.2.1'
-    implementation group: 'org.bouncycastle', name: 'bcpg-jdk18on', version: '1.78.1'
-    implementation group: 'org.bouncycastle', name: 'bcprov-ext-jdk15to18', version: '1.78'
 
-    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.11.0'
-    testImplementation 'org.slf4j:slf4j-nop:1.7.36'
-
-    generateJAXB group: 'com.sun.xml.bind', name: 'jaxb-xjc', version: '2.3.5'
+configurations.named('functionalTestImplementation') {
+    extendsFrom(configurations.testImplementation)
 }
 
-////////// PLUGIN CONFIGURATION ////////// 
-//sourceCompatibility=1.7
+configurations.named('functionalTestRuntimeOnly') {
+    extendsFrom(configurations.runtimeOnly)
+}
+
+configurations.named('certificationTestImplementation') {
+    extendsFrom(configurations.functionalTestImplementation)
+}
+
+configurations.named('certificationTestRuntimeOnly') {
+    extendsFrom(configurations.functionalTestRuntimeOnly)
+}
+
+
+dependencies {
+
+    implementation "com.jcraft:jsch:0.1.55"
+    implementation "commons-io:commons-io:2.18.0"
+    implementation "org.apache.httpcomponents.client5:httpclient5:5.4.3"
+    implementation "org.bouncycastle:bcpg-jdk18on:1.84"
+    implementation "org.bouncycastle:bcprov-jdk18on:1.84"
+    implementation 'org.bouncycastle:bcutil-jdk18on:1.84'
+    implementation "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
+    implementation "org.glassfish.jaxb:jaxb-runtime:4.0.6"
+    implementation "org.slf4j:slf4j-simple:2.0.17"
+
+    testImplementation "org.slf4j:slf4j-nop:2.0.17"
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.mockito:mockito-core:5.17.0"
+
+    // JAXB XJC code generator (Jakarta JAXB 4.x)
+    generateJAXB "org.glassfish.jaxb:jaxb-xjc:4.0.5"
+    generateJAXB "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
+    generateJAXB "org.glassfish.jaxb:jaxb-runtime:4.0.6"
+
+}
+
+////////// PLUGIN CONFIGURATION //////////
 
 clean {
     // temporary, we need to change the tests to generate output inside build folder
@@ -80,20 +118,29 @@ jar{
     manifest {
         attributes("Implementation-Title":"Cnp SDK For Java 1.5 and greater", "Implementation-Version":"${JAR_VERSION}","Implementation-Vendor":"Cnp&Co","Main-Class":"io.github.vantiv.sdk.Setup")
     }
-    getDestinationDirectory().set(file("${DIST_DIR_15}/lib"))
+    // Produce a self-contained distributable jar for file-based consumers.
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+
+    getDestinationDirectory().set(file("${DIST_DIR_21}/lib"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.jar")
 }
 
 task javadocJar(type:Jar){
     dependsOn javadoc
     getArchiveClassifier().set('javadoc')
-    getDestinationDirectory().set(file("$buildDir/kit/java15/doc"))
+    getDestinationDirectory().set(file("$buildDir/kit/java21/doc"))
     from tasks.javadoc
 }
 
 test {
-    reports.junitXml.destination(file("$buildDir/test-results/unit"))
-    reports.html.destination(file("$buildDir/reports/tests/unit"))
+    reports {
+        junitXml.outputLocation = file("$buildDir/test-results/unit")
+        html.outputLocation = file("$buildDir/reports/tests/unit")
+    }
 }
 
 ////////// CUSTOM TASKS ///////////
@@ -111,8 +158,8 @@ task processXsd (type: Copy) {
     }
     
     doLast {
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(attributeFormDefault=\"unqualified\")>", replace:"\\1 xmlns:jaxb=\"http://java.sun.com/xml/ns/jaxb\" jaxb:version=\"2.0\">", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(elementFormDefault=\"qualified\")>", replace:"\\1 xmlns:jaxb=\"http://java.sun.com/xml/ns/jaxb\" jaxb:version=\"2.0\">", byline:true)
+        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(attributeFormDefault=\"unqualified\")>", replace:"\\1 xmlns:jaxb=\"https://jakarta.ee/xml/ns/jaxb\" jaxb:version=\"3.0\">", byline:true)
+        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(elementFormDefault=\"qualified\")>", replace:"\\1 xmlns:jaxb=\"https://jakarta.ee/xml/ns/jaxb\" jaxb:version=\"3.0\">", byline:true)
         ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"<xs:attribute name=\"id\" type=\"xp:string25Type\" use=\"required\"\\s*/>", replace:"       <xs:attribute name=\"id\" type=\"xp:string25Type\" use=\"required\" />", byline:true)
         ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"<xs:attribute name=\"id\" type=\"xp:stringMin1Max25CollapseWhiteSpaceType\" use=\"required\"\\s*/>", replace:"       <xs:attribute name=\"id\" type=\"xp:stringMin1Max25CollapseWhiteSpaceType\" use=\"required\" />", byline:true)
         ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"<xs:attribute name=\"customerId\" type=\"xp:customerIdType\" use=\"optional\"\\s*/>", replace:"       <xs:attribute name=\"customerId\" type=\"xp:customerIdType\" use=\"optional\"/>", byline:true)
@@ -179,7 +226,7 @@ task generateJaxbClasses(dependsOn: processXsd) {
     eclipseClasspath.dependsOn it
     
     ext.bindingsFile = "src/main/xsd/bindings.xml"
-    ext.generatedDir = "${buildDir}/generated"
+    ext.generatedDir = xjcGeneratedDir
     
     inputs.dir processXsd.xsdOutput
     inputs.file bindingsFile
@@ -202,8 +249,10 @@ task testFunctional(type:Test, dependsOn: functionalTestClasses){
     classpath = sourceSets.functionalTest.runtimeClasspath
     mustRunAfter test
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
-    reports.junitXml.destination(file("$buildDir/test-results/functional"))
-    reports.html.destination(file("$buildDir/reports/tests/functional"))
+    reports {
+        junitXml.outputLocation = file("$buildDir/test-results/functional")
+        html.outputLocation = file("$buildDir/reports/tests/functional")
+    }
 }
 
 task testCertification(type:Test, dependsOn: certificationTestClasses){
@@ -211,34 +260,26 @@ task testCertification(type:Test, dependsOn: certificationTestClasses){
     classpath = sourceSets.certificationTest.runtimeClasspath
     mustRunAfter testFunctional
     testClassesDirs = sourceSets.certificationTest.output.classesDirs
-    reports.junitXml.destination(file("$buildDir/test-results/certification"))
-    reports.html.destination(file("$buildDir/reports/tests/certification"))
+    reports {
+        junitXml.outputLocation = file("$buildDir/test-results/certification")
+        html.outputLocation = file("$buildDir/reports/tests/certification")
+    }
 }
 
 task copyJarToKit(type:Copy, dependsOn:[check,jar]){
-    from "${DIST_DIR_15}/lib/cnp-sdk-for-java-${JAR_VERSION}.jar"
+    from "${DIST_DIR_21}/lib/cnp-sdk-for-java-${JAR_VERSION}.jar"
     from "LICENSE"
     into KIT_DIR
 }
 
 task copyLibsToKit(type:Copy, dependsOn:check){
-    from configurations.runtimeClasspath.asFileTree.matching{
-        include '**/activation*'
-        include '**/jaxb-api*'
-        include '**/jaxb-impl*'
-        include '**/jsr173*'
-        include '**/commons-logging-1.1.1*'
-        include '**/commons-codec*'
-        include '**/fluent-hc*'
-        include '**/httpclient*'
-        include '**/httpcore*'
-        include '**/httpmime*'
-        include '**/jsch*'
-        include '**/commons-io*'
-        include '**/bcpg-jdk18on*'
-        include '**/bcprov-ext-jdk15to18*'
-    }
-
+    // Copy ALL resolved runtime jars (direct + transitive) so consumers using
+    // the kit never need to add dependencies manually.
+    // Covers: jsch, commons-io, httpclient5, httpcore5, httpcore5-h2, slf4j-api,
+    //         bcpg-jdk18on, bcprov-jdk18on, jakarta.xml.bind-api, jaxb-runtime,
+    //         jaxb-core, txw2, istack-commons-runtime, angus-activation,
+    //         jakarta.activation-api  — and any future transitive additions.
+    from configurations.runtimeClasspath
     into KIT_DEPENDENCIES_DIR
 }
 
@@ -246,17 +287,17 @@ task tarKit(type:Tar, dependsOn:[copyJarToKit, copyLibsToKit]){
     compression = Compression.GZIP
     getDestinationDirectory().set(file("$buildDir/kit"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.tar.gz")
-    from "$buildDir/kit/java15"
+    from "$buildDir/kit/java21"
 }
 
 task zipKit(type:Zip, dependsOn:[copyJarToKit, copyLibsToKit]){
     getDestinationDirectory().set(file("$buildDir/kit"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.zip")
-    from "$buildDir/kit/java15"
+    from "$buildDir/kit/java21"
 }
 
 task kit(dependsOn:[tarKit, zipKit]){
-if (JavaVersion.current().isJava8Compatible()) {
+if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
     allprojects {
       tasks.withType(Javadoc) {
         options.addStringOption('Xdoclint:none', '-quiet')

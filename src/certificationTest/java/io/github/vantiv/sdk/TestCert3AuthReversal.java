@@ -27,7 +27,7 @@ public class TestCert3AuthReversal {
 
 	private static CnpOnline cnp;
 
-	private String preliveStatus = System.getenv("preliveStatus");
+	private final String preliveStatus = System.getenv("preliveStatus") == null ? "down" : System.getenv("preliveStatus");
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {

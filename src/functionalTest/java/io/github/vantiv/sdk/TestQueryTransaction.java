@@ -185,7 +185,8 @@ public class TestQueryTransaction {
         cnpProperty.setProperty("multiSiteUrl2", url2);
         cnpProperty.setProperty("oltpEncryptionPayload", "true");
         cnpProperty.setProperty("oltpEncryptionKeySequence", "10000");
-        cnpProperty.setProperty("oltpEncryptionKeyPath", "/home/buildvwr/pgpKeyOltp/cnpOltpEncryptionKey.asc");
+        cnpProperty.setProperty("oltpEncryptionKeyPath", System.getProperty("user.dir") + "/src/functionalTest/resources/testCnpOltpEncryptionKey.asc");
         return cnpProperty;
     }
+
 }

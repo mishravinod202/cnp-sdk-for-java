@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -104,7 +104,7 @@ public class TestCnpOnline {
 		AuthorizationResponse authorize = cnp.authorize(authorization);
 		assertEquals(123L, authorize.getCnpTxnId());
 		assertEquals("123455", authorize.getApplepayResponse().getApplicationPrimaryAccountNumber());
-		assertEquals(new Long(106), authorize.getApplepayResponse().getTransactionAmount());
+		assertEquals(Long.valueOf(106), authorize.getApplepayResponse().getTransactionAmount());
 		assertEquals("sandbox", authorize.getLocation());
 	}
 
@@ -2764,7 +2764,7 @@ public class TestCnpOnline {
 		FraudCheckResponse fraudCheckResponse = cnp.fraudCheck(fraudCheck);
 		AdvancedFraudResultsType advancedFraudResultsType = fraudCheckResponse.getAdvancedFraudResults();
 		assertEquals("pass", advancedFraudResultsType.getDeviceReviewStatus());
-		assertEquals(new Integer(42), advancedFraudResultsType.getDeviceReputationScore());
+		assertEquals(Integer.valueOf(42), advancedFraudResultsType.getDeviceReputationScore());
 		assertEquals(5, advancedFraudResultsType.getTriggeredRules().size());
 		assertEquals("sandbox", fraudCheckResponse.getLocation());
 	}

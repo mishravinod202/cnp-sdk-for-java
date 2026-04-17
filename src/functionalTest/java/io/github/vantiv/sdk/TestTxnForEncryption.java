@@ -16,7 +16,7 @@ public class TestTxnForEncryption {
         config.load(new FileInputStream(new Configuration().location()));
         config.setProperty("oltpEncryptionPayload", "true");
         config.setProperty("oltpEncryptionKeySequence", "10000");
-        config.setProperty("oltpEncryptionKeyPath","/home/buildvwr/pgpKeyOltp/cnpOltpEncryptionKey.asc");
+        config.setProperty("oltpEncryptionKeyPath",System.getProperty("user.dir") + "/src/functionalTest/resources/testCnpOltpEncryptionKey.asc");
         cnp = new CnpOnline(config);
     }
 

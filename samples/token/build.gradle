@@ -2,7 +2,7 @@ apply plugin : 'java'
 apply plugin : 'eclipse'
 repositories {
     maven  {
-        url "http://repo1.maven.org/maven2"
+        url = "http://repo1.maven.org/maven2"
     }
 }
    dependencies{
@@ -10,12 +10,12 @@ repositories {
  }
   task execRegisterTokenExample (type:JavaExec){
 	check.dependsOn it
-        main='io.github.vantiv.sdk.samples.RegisterTokenExample'
+        mainClass = 'io.github.vantiv.sdk.samples.RegisterTokenExample'
         classpath = sourceSets.main.runtimeClasspath	   
 }
  task execSaleWithTokenExample (type:JavaExec){
 	check.dependsOn it
-        main='io.github.vantiv.sdk.samples.SaleWithTokenExample'
+        mainClass = 'io.github.vantiv.sdk.samples.SaleWithTokenExample'
         classpath = sourceSets.main.runtimeClasspath	   
 }
 

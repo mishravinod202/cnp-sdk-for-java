@@ -1,7 +1,8 @@
 = Vantiv eCommerce CNP CHANGELOG
 
-==Change log Future Release
-Change: Added ANT commands to enable support for Integer values in enumeration definitions
+### Change Log for 12.49.0_jdk21 (April 17,2026)
+- Change: Added ANT commands to enable support for Integer values in enumeration definitions
+- Change: Updated Java version compatibility to Java 21. Source & Target compatibility is set to version 17.
 
 ==Change Log for 12.49 (January 23,2026)
 Change: [cnpAPI v12.49]: New simple element 'preferredCustomer' of type 'boolean' is added in  'authorization' and 'sale' request.

@@ -134,7 +134,7 @@ public class TestSale {
         sale.setId("id");
         SaleResponse response = cnp.sale(sale);
         assertEquals("Insufficient Funds", response.getMessage());
-        assertEquals(new Long(110),response.getApplepayResponse().getTransactionAmount());
+        assertEquals(Long.valueOf(110),response.getApplepayResponse().getTransactionAmount());
 		assertEquals("sandbox", response.getLocation());
     }
 	
@@ -574,8 +574,8 @@ public class TestSale {
 		passengerTransportData.setCreditReasonIndicator(CreditReasonIndicatorEnum.C);
 		passengerTransportData.setTicketChangeIndicator(TicketChangeIndicatorEnum.C);
 		passengerTransportData.setTicketIssuerAddress("IssuerAddress");
-		passengerTransportData.setExchangeAmount(new Long(110));
-		passengerTransportData.setExchangeFeeAmount(new Long(112));
+		passengerTransportData.setExchangeAmount(Long.valueOf(110));
+		passengerTransportData.setExchangeFeeAmount(Long.valueOf(112));
 		passengerTransportData.setExchangeTicketNumber("ExchangeNumber");
 		passengerTransportData.getTripLegDatas().add(addTripLegData());
 		return  passengerTransportData;
