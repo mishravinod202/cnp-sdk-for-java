@@ -10,7 +10,7 @@ An example of the batch functionality of Cnp Java SDK. We create one of each tra
 public class MechaBatch {
     public static void main(String[] args) {
 
-		String preliveStatus = System.getenv("preliveStatus");
+		String preliveStatus = System.getenv("preliveStatus") == null ? "down" : System.getenv("preliveStatus");
 
 		String requestFileName = "cnpSdk-testBatchFile-MECHA.xml";
 		CnpBatchFileRequest request = new CnpBatchFileRequest(requestFileName);

@@ -125,14 +125,14 @@ jar{
     }
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
 
-    getDestinationDirectory().set(file("${DIST_DIR_21}/lib"))
+    getDestinationDirectory().set(file("${DIST_DIR_17}/lib"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.jar")
 }
 
 task javadocJar(type:Jar){
     dependsOn javadoc
     getArchiveClassifier().set('javadoc')
-    getDestinationDirectory().set(file("$buildDir/kit/java21/doc"))
+    getDestinationDirectory().set(file("$buildDir/kit/java17/doc"))
     from tasks.javadoc
 }
 
@@ -267,7 +267,7 @@ task testCertification(type:Test, dependsOn: certificationTestClasses){
 }
 
 task copyJarToKit(type:Copy, dependsOn:[check,jar]){
-    from "${DIST_DIR_21}/lib/cnp-sdk-for-java-${JAR_VERSION}.jar"
+    from "${DIST_DIR_17}/lib/cnp-sdk-for-java-${JAR_VERSION}.jar"
     from "LICENSE"
     into KIT_DIR
 }
@@ -287,17 +287,17 @@ task tarKit(type:Tar, dependsOn:[copyJarToKit, copyLibsToKit]){
     compression = Compression.GZIP
     getDestinationDirectory().set(file("$buildDir/kit"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.tar.gz")
-    from "$buildDir/kit/java21"
+    from "$buildDir/kit/java17"
 }
 
 task zipKit(type:Zip, dependsOn:[copyJarToKit, copyLibsToKit]){
     getDestinationDirectory().set(file("$buildDir/kit"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.zip")
-    from "$buildDir/kit/java21"
+    from "$buildDir/kit/java17"
 }
 
 task kit(dependsOn:[tarKit, zipKit]){
-if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
+if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
     allprojects {
       tasks.withType(Javadoc) {
         options.addStringOption('Xdoclint:none', '-quiet')
