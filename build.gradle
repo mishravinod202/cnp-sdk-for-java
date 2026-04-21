@@ -7,7 +7,7 @@ apply plugin : 'maven-publish'
 group = 'io.github.vantiv'
 version = JAR_VERSION
 
-ext.xjcGeneratedDir = "$buildDir/generated/sources/xjc/main/java"
+ext.xjcGeneratedDir = "$rootProject.layout.buildDirectory/generated/sources/xjc/main/java"
 
 // ---- Java toolchain + Java 17 baseline bytecode (runs on 17 through 21) ----
 allprojects {
@@ -111,7 +111,7 @@ clean {
 }
 
 jacocoTestReport {
-    executionData(fileTree(dir:"${buildDir}/jacoco/", include:"*.exec"))
+    executionData(fileTree(dir:"${rootProject.layout.buildDirectory}/jacoco/", include:"*.exec"))
 }
 
 jar{
@@ -125,27 +125,27 @@ jar{
     }
     exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
 
-    getDestinationDirectory().set(file("${DIST_DIR_17}/lib"))
+    getDestinationDirectory().set(file("${DIST_DIR}/lib"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.jar")
 }
 
 task javadocJar(type:Jar){
     dependsOn javadoc
     getArchiveClassifier().set('javadoc')
-    getDestinationDirectory().set(file("$buildDir/kit/java17/doc"))
+    getDestinationDirectory().set(file("$rootProject.layout.buildDirectory/kit/java17/doc"))
     from tasks.javadoc
 }
 
 test {
     reports {
-        junitXml.outputLocation = file("$buildDir/test-results/unit")
-        html.outputLocation = file("$buildDir/reports/tests/unit")
+        junitXml.outputLocation = file("$rootProject.layout.buildDirectory/test-results/unit")
+        html.outputLocation = file("$rootProject.layout.buildDirectory/reports/tests/unit")
     }
 }
 
 ////////// CUSTOM TASKS ///////////
 task processXsd (type: Copy) {
-    ext.xsdOutput = file("$buildDir/xsd") 
+    ext.xsdOutput = file("$rootProject.layout.buildDirectory/xsd") 
     
     from ('src/main/xsd') {
         include '*.xsd'
@@ -250,8 +250,8 @@ task testFunctional(type:Test, dependsOn: functionalTestClasses){
     mustRunAfter test
     testClassesDirs = sourceSets.functionalTest.output.classesDirs
     reports {
-        junitXml.outputLocation = file("$buildDir/test-results/functional")
-        html.outputLocation = file("$buildDir/reports/tests/functional")
+        junitXml.outputLocation = file("$rootProject.layout.buildDirectory/test-results/functional")
+        html.outputLocation = file("$rootProject.layout.buildDirectory/reports/tests/functional")
     }
 }
 
@@ -261,13 +261,13 @@ task testCertification(type:Test, dependsOn: certificationTestClasses){
     mustRunAfter testFunctional
     testClassesDirs = sourceSets.certificationTest.output.classesDirs
     reports {
-        junitXml.outputLocation = file("$buildDir/test-results/certification")
-        html.outputLocation = file("$buildDir/reports/tests/certification")
+        junitXml.outputLocation = file("$rootProject.layout.buildDirectory/test-results/certification")
+        html.outputLocation = file("$rootProject.layout.buildDirectory/reports/tests/certification")
     }
 }
 
 task copyJarToKit(type:Copy, dependsOn:[check,jar]){
-    from "${DIST_DIR_17}/lib/cnp-sdk-for-java-${JAR_VERSION}.jar"
+    from "${DIST_DIR}/lib/cnp-sdk-for-java-${JAR_VERSION}.jar"
     from "LICENSE"
     into KIT_DIR
 }
@@ -285,15 +285,15 @@ task copyLibsToKit(type:Copy, dependsOn:check){
 
 task tarKit(type:Tar, dependsOn:[copyJarToKit, copyLibsToKit]){
     compression = Compression.GZIP
-    getDestinationDirectory().set(file("$buildDir/kit"))
+    getDestinationDirectory().set(file("$rootProject.layout.buildDirectory/kit"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.tar.gz")
-    from "$buildDir/kit/java17"
+    from "$rootProject.layout.buildDirectory/kit/java17"
 }
 
 task zipKit(type:Zip, dependsOn:[copyJarToKit, copyLibsToKit]){
-    getDestinationDirectory().set(file("$buildDir/kit"))
+    getDestinationDirectory().set(file("$rootProject.layout.buildDirectory/kit"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.zip")
-    from "$buildDir/kit/java17"
+    from "$rootProject.layout.buildDirectory/kit/java17"
 }
 
 task kit(dependsOn:[tarKit, zipKit]){
@@ -346,14 +346,14 @@ publishing {
 model {
     tasks.generatePomFileForMavenPublication {
         build.dependsOn it
-        destination = file("$buildDir/kit/cnp-sdk-for-java-${JAR_VERSION}.pom")
+        destination = file("$rootProject.layout.buildDirectory/kit/cnp-sdk-for-java-${JAR_VERSION}.pom")
     }
 }
 
 task sourceJar(type:Jar) {
     build.dependsOn it
     dependsOn generateJaxbClasses
-    getDestinationDirectory().set(file("${buildDir}/kit"))
+    getDestinationDirectory().set(file("${rootProject.layout.buildDirectory}/kit"))
     getArchiveClassifier().set('sources')
     from "src/main/java"
     from generateJaxbClasses.generatedDir
