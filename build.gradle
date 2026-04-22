@@ -263,7 +263,7 @@ task testCertification(type:Test, dependsOn: certificationTestClasses){
 }
 
 jacocoTestReport {
-    dependsOn testFunctional
+    dependsOn testCertification
     executionData(fileTree(dir:"${buildDir}/jacoco/", include:"*.exec"))
 }
 
