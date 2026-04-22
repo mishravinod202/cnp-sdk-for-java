@@ -110,10 +110,6 @@ clean {
     delete 'test'
 }
 
-jacocoTestReport {
-    executionData(fileTree(dir:"${buildDir}/jacoco/", include:"*.exec"))
-}
-
 jar{
     manifest {
         attributes("Implementation-Title":"Cnp SDK For Java 1.5 and greater", "Implementation-Version":"${JAR_VERSION}","Implementation-Vendor":"Cnp&Co","Main-Class":"io.github.vantiv.sdk.Setup")
@@ -264,6 +260,11 @@ task testCertification(type:Test, dependsOn: certificationTestClasses){
         junitXml.outputLocation = file("$buildDir/test-results/certification")
         html.outputLocation = file("$buildDir/reports/tests/certification")
     }
+}
+
+jacocoTestReport {
+    dependsOn testFunctional
+    executionData(fileTree(dir:"${buildDir}/jacoco/", include:"*.exec"))
 }
 
 task copyJarToKit(type:Copy, dependsOn:[check,jar]){
