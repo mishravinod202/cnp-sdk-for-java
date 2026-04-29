@@ -274,7 +274,7 @@ publishing {
             pom {
                 name = 'cnp-sdk-for-java'
                 description = 'Vantiv eCommerce Java SDK is a Java implementation of the Vantiv eCommerce XML API'
-                url = 'https://github.com/Vantiv/cnp-sdk-for-java'
+                url = 'https://github.com/Worldpay/cnp-sdk-for-java'
                 groupId = 'io.github.vantiv'
                 artifactId = 'cnp-sdk-for-java'
                 version = "${JAR_VERSION}"
@@ -282,20 +282,20 @@ publishing {
                 licenses {
                     license {
                         name = 'License'
-                        url = 'https://github.com/Vantiv/cnp-sdk-for-java/blob/12.x/LICENSE'
+                        url = 'https://github.com/Worldpay/cnp-sdk-for-java/blob/12.x/LICENSE'
                     }
                 }
                 developers{
                     developer{
                         id = 'vantivSDKSupport'
                         name = 'VantivSDKSupport'
-                        email = 'sdksupport@fisglobal.com'
+                        email = 'sdksupport@worldpay.com'
                     }
                 }
                 scm {
                     connection = 'scm:git:github.com/vantiv/cnp-sdk-for-java.git'
                     developerConnection = 'scm:git:ssh://github.com/vantiv/cnp-sdk-for-java.git'
-                    url = 'https://github.com/vantiv/cnp-sdk-for-java.git'
+                    url = 'https://github.com/Worldpay/cnp-sdk-for-java'
                 }
             }
         }

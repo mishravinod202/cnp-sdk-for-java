@@ -4,12 +4,12 @@ Vantiv eCommerce Java SDK
 #### All major version changes require recertification to the new version. Once certified for the use of a new version, Vantiv modifies your Merchant Profile, allowing you to submit transaction to the Production Environment using the new version. Updating your code without recertification and modification of your Merchant Profile will result in transaction declines. Please consult you Implementation Analyst for additional information about this process.
 About Vantiv eCommerce
 ------------
-[Vantiv eCommerce](https://developer.vantiv.com/community/ecommerce) powers the payment processing engines for leading companies that sell directly to consumers through  internet retail, direct response marketing (TV, radio and telephone), and online services. Vantiv eCommerce is the leading authority in card-not-present (CNP) commerce, transaction processing and merchant services.
+[Vantiv eCommerce](https://docs.worldpay.com/apis/cnpapi) powers the payment processing engines for leading companies that sell directly to consumers through  internet retail, direct response marketing (TV, radio and telephone), and online services. Vantiv eCommerce is the leading authority in card-not-present (CNP) commerce, transaction processing and merchant services.
 
 
 About this SDK
 --------------
-The Vantiv eCommerce Java SDK is a Java implementation of the [Vantiv eCommerce](https://developer.vantiv.com/community/ecommerce) XML API. This SDK was created to make it as easy as possible to process your payments with Vantiv eCommerce. This SDK utilizes the HTTPS protocol to securely connect to Vantiv eCommerce. Using the SDK requires coordination with the Vantiv eCommerce team in order to be provided with credentials for accessing our systems.
+The Vantiv eCommerce Java SDK is a Java implementation of the [Vantiv eCommerce](https://docs.worldpay.com/apis/cnpapi) XML API. This SDK was created to make it as easy as possible to process your payments with Vantiv eCommerce. This SDK utilizes the HTTPS protocol to securely connect to Vantiv eCommerce. Using the SDK requires coordination with the Vantiv eCommerce team in order to be provided with credentials for accessing our systems.
 
 Each Java SDK release supports all of the functionality present in the associated Vantiv eCommerce XML version (e.g., SDK v12.19.1 supports Vantiv eCommerce XML v12.0). Please see the online copy of our XSD for Vantiv eCommerce XML to get more details on what the Vantiv eCommerce payments engine supports.
 
@@ -17,7 +17,7 @@ This SDK was implemented to support the Java programming language and was create
 
 See LICENSE file for details on using this software.
 
-Please contact [Vantiv eCommerce](https://developer.vantiv.com/community/ecommerce) to receive valid merchant credentials in order to run tests successfully or if you require assistance in any way.  We are reachable at sdksupport@fisglobal.com
+Please contact [Vantiv eCommerce](https://docs.worldpay.com/apis/cnpapi) to receive valid merchant credentials in order to run tests successfully or if you require assistance in any way.  We are reachable at sdksupport@worldpay.com
 
 Setup
 -----
