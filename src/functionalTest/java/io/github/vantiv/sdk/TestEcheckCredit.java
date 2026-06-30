@@ -13,6 +13,7 @@ import io.github.vantiv.sdk.generate.EcheckCredit;
 import io.github.vantiv.sdk.generate.EcheckCreditResponse;
 import io.github.vantiv.sdk.generate.EcheckTokenType;
 import io.github.vantiv.sdk.generate.EcheckType;
+import io.github.vantiv.sdk.generate.IdentityBundle;
 import io.github.vantiv.sdk.generate.OrderSourceType;
 
 public class TestEcheckCredit {
@@ -170,6 +171,61 @@ public class TestEcheckCredit {
 		billToAddress.setState("MA");
 		billToAddress.setEmail("cnp.com");
 		echeckcredit.setBillToAddress(billToAddress);
+		echeckcredit.setId("id");
+		EcheckCreditResponse response = cnp.echeckCredit(echeckcredit);
+		assertEquals("Approved", response.getMessage());
+		assertEquals("sandbox", response.getLocation());
+	}
+
+	// v12.50: identityBundle added to echeckCredit (cnpTxnId path)
+	@Test
+	public void echeckCreditWithIdentityBundleByCnpTxnId() throws Exception {
+		EcheckCredit echeckcredit = new EcheckCredit();
+		echeckcredit.setCnpTxnId(123456789101112L);
+		echeckcredit.setAmount(12L);
+		IdentityBundle identityBundle = new IdentityBundle();
+		identityBundle.setMerchantId("12222");
+		identityBundle.setEntityId("222222");
+		identityBundle.setEntityReference("32222");
+		identityBundle.setResourceId("422222");
+		identityBundle.setResourceReference("52222");
+		identityBundle.setCommandId("6222");
+		identityBundle.setCommandReference("72222");
+		echeckcredit.setIdentityBundle(identityBundle);
+		echeckcredit.setId("id");
+		EcheckCreditResponse response = cnp.echeckCredit(echeckcredit);
+		assertEquals("Approved", response.getMessage());
+		assertEquals("sandbox", response.getLocation());
+	}
+
+	// v12.50: identityBundle added to echeckCredit (orderId path)
+	@Test
+	public void echeckCreditWithIdentityBundleByOrderId() throws Exception {
+		EcheckCredit echeckcredit = new EcheckCredit();
+		echeckcredit.setAmount(12L);
+		echeckcredit.setOrderId("12345");
+		echeckcredit.setOrderSource(OrderSourceType.ECOMMERCE);
+		EcheckType echeck = new EcheckType();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("12345657890");
+		echeck.setRoutingNum("123456789");
+		echeck.setCheckNum("123455");
+		echeckcredit.setEcheck(echeck);
+		Contact billToAddress = new Contact();
+		billToAddress.setName("Bob");
+		billToAddress.setCity("Lowell");
+		billToAddress.setState("MA");
+		billToAddress.setEmail("cnp.com");
+		echeckcredit.setBillToAddress(billToAddress);
+		IdentityBundle identityBundle = new IdentityBundle();
+		identityBundle.setMerchantId("12222");
+		identityBundle.setEntityId("222222");
+		identityBundle.setEntityReference("32222");
+		identityBundle.setResourceId("422222");
+		identityBundle.setResourceReference("52222");
+		identityBundle.setCommandId("6222");
+		identityBundle.setCommandReference("72222");
+		echeckcredit.setIdentityBundle(identityBundle);
 		echeckcredit.setId("id");
 		EcheckCreditResponse response = cnp.echeckCredit(echeckcredit);
 		assertEquals("Approved", response.getMessage());

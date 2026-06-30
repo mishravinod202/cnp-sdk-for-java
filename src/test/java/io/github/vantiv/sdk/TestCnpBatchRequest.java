@@ -1,6 +1,7 @@
 package io.github.vantiv.sdk;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
@@ -678,6 +679,94 @@ public class TestCnpBatchRequest {
         applepayType.setSignature("sign");
         applepayType.setVersion("1");
         return applepayType;
+    }
+
+    // v12.50: vendorCredit gains rtp attribute (cnpBatch XSD change)
+
+    @Test
+    public void testVendorCreditWithRtpTrue() {
+        cnpBatchFileRequest = new CnpBatchFileRequest("testFile", property);
+        cnpBatchRequest = cnpBatchFileRequest.createBatch("101");
+
+        cnpBatchRequest.setNumOfTxn(1);
+        Marshaller mockMarshaller = Mockito.mock(Marshaller.class);
+        cnpBatchRequest.setMarshaller(mockMarshaller);
+
+        VendorCredit vendorCredit = new VendorCredit();
+        vendorCredit.setFundingSubmerchantId("12345");
+        vendorCredit.setVendorName("vendor");
+        vendorCredit.setFundsTransferId("1234567");
+        vendorCredit.setAmount(107L);
+        vendorCredit.setAccountInfo(new EcheckTypeCtx());
+        vendorCredit.setRtp(true);
+        cnpBatchRequest.addTransaction(vendorCredit);
+
+        assertEquals(1, cnpBatchRequest.getBatchRequest()
+                .getNumVendorCredit().intValue());
+        assertEquals(107, cnpBatchRequest.getBatchRequest()
+                .getVendorCreditAmount().intValue());
+        assertTrue(vendorCredit.isRtp());
+    }
+
+    @Test
+    public void testVendorCreditWithRtpFalse() {
+        cnpBatchFileRequest = new CnpBatchFileRequest("testFile", property);
+        cnpBatchRequest = cnpBatchFileRequest.createBatch("101");
+
+        cnpBatchRequest.setNumOfTxn(1);
+        Marshaller mockMarshaller = Mockito.mock(Marshaller.class);
+        cnpBatchRequest.setMarshaller(mockMarshaller);
+
+        VendorCredit vendorCredit = new VendorCredit();
+        vendorCredit.setFundingSubmerchantId("12345");
+        vendorCredit.setVendorName("vendor");
+        vendorCredit.setFundsTransferId("1234567");
+        vendorCredit.setAmount(108L);
+        vendorCredit.setAccountInfo(new EcheckTypeCtx());
+        vendorCredit.setRtp(false);
+        cnpBatchRequest.addTransaction(vendorCredit);
+
+        assertEquals(1, cnpBatchRequest.getBatchRequest()
+                .getNumVendorCredit().intValue());
+        assertEquals(108, cnpBatchRequest.getBatchRequest()
+                .getVendorCreditAmount().intValue());
+        assertFalse(vendorCredit.isRtp());
+    }
+
+    @Test
+    public void testVendorCreditRtpCountsAndAmounts() {
+        cnpBatchFileRequest = new CnpBatchFileRequest("testFile", property);
+        cnpBatchRequest = cnpBatchFileRequest.createBatch("101");
+
+        cnpBatchRequest.setNumOfTxn(1);
+        Marshaller mockMarshaller = Mockito.mock(Marshaller.class);
+        cnpBatchRequest.setMarshaller(mockMarshaller);
+
+        VendorCredit vcreditRtpTrue = new VendorCredit();
+        vcreditRtpTrue.setFundingSubmerchantId("12345");
+        vcreditRtpTrue.setVendorName("vendor");
+        vcreditRtpTrue.setFundsTransferId("1234567");
+        vcreditRtpTrue.setAmount(100L);
+        vcreditRtpTrue.setAccountInfo(new EcheckTypeCtx());
+        vcreditRtpTrue.setRtp(true);
+        cnpBatchRequest.addTransaction(vcreditRtpTrue);
+
+        VendorCredit vcreditRtpFalse = new VendorCredit();
+        vcreditRtpFalse.setFundingSubmerchantId("12345");
+        vcreditRtpFalse.setVendorName("vendor2");
+        vcreditRtpFalse.setFundsTransferId("1234568");
+        vcreditRtpFalse.setAmount(200L);
+        vcreditRtpFalse.setAccountInfo(new EcheckTypeCtx());
+        vcreditRtpFalse.setRtp(false);
+        cnpBatchRequest.addTransaction(vcreditRtpFalse);
+
+        assertEquals(2, cnpBatchRequest.getBatchRequest()
+                .getNumVendorCredit().intValue());
+        assertEquals(300, cnpBatchRequest.getBatchRequest()
+                .getVendorCreditAmount().intValue());
+        assertEquals(3, cnpBatchRequest.getNumberOfTransactions());
+        assertTrue(vcreditRtpTrue.isRtp());
+        assertFalse(vcreditRtpFalse.isRtp());
     }
 
 }

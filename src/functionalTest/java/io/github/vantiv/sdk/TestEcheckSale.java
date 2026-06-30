@@ -15,6 +15,7 @@ import io.github.vantiv.sdk.generate.EcheckSale;
 import io.github.vantiv.sdk.generate.EcheckSalesResponse;
 import io.github.vantiv.sdk.generate.EcheckTokenType;
 import io.github.vantiv.sdk.generate.EcheckType;
+import io.github.vantiv.sdk.generate.IdentityBundle;
 import io.github.vantiv.sdk.generate.OrderSourceType;
 
 public class TestEcheckSale {
@@ -286,6 +287,137 @@ public class TestEcheckSale {
 		contact.setEmail("cnp.com");
 		echecksale.setBillToAddress(contact);
 		echecksale.setShipToAddress(contact);
+		echecksale.setId("id");
+		EcheckSalesResponse response = cnp.echeckSale(echecksale);
+		assertEquals("Approved", response.getMessage());
+		assertEquals("sandbox", response.getLocation());
+	}
+
+	// v12.50: identityBundle added to echeckSale
+	@Test
+	public void echeckSaleWithIdentityBundle() throws Exception {
+		EcheckSale echecksale = new EcheckSale();
+		echecksale.setAmount(123456L);
+		echecksale.setOrderId("12345");
+		echecksale.setOrderSource(OrderSourceType.ECOMMERCE);
+		EcheckType echeck = new EcheckType();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("12345657890");
+		echeck.setRoutingNum("123456789");
+		echeck.setCheckNum("123455");
+		echecksale.setEcheck(echeck);
+		Contact contact = new Contact();
+		contact.setName("Bob");
+		contact.setCity("lowell");
+		contact.setState("MA");
+		contact.setEmail("cnp.com");
+		echecksale.setBillToAddress(contact);
+		IdentityBundle identityBundle = new IdentityBundle();
+		identityBundle.setMerchantId("12222");
+		identityBundle.setEntityId("222222");
+		identityBundle.setEntityReference("32222");
+		identityBundle.setResourceId("422222");
+		identityBundle.setResourceReference("52222");
+		identityBundle.setCommandId("6222");
+		identityBundle.setCommandReference("72222");
+		echecksale.setIdentityBundle(identityBundle);
+		echecksale.setId("id");
+		EcheckSalesResponse response = cnp.echeckSale(echecksale);
+		assertEquals("Approved", response.getMessage());
+		assertEquals("sandbox", response.getLocation());
+	}
+
+	// v12.50: new orderSource values on echeckSale
+	@Test
+	public void echeckSaleWithOrderSourcePaze() throws Exception {
+		EcheckSale echecksale = new EcheckSale();
+		echecksale.setAmount(123456L);
+		echecksale.setOrderId("12345");
+		echecksale.setOrderSource(OrderSourceType.PAZE);
+		EcheckType echeck = new EcheckType();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("12345657890");
+		echeck.setRoutingNum("123456789");
+		echeck.setCheckNum("123455");
+		echecksale.setEcheck(echeck);
+		Contact contact = new Contact();
+		contact.setName("Bob");
+		contact.setCity("lowell");
+		contact.setState("MA");
+		contact.setEmail("cnp.com");
+		echecksale.setBillToAddress(contact);
+		echecksale.setId("id");
+		EcheckSalesResponse response = cnp.echeckSale(echecksale);
+		assertEquals("Approved", response.getMessage());
+		assertEquals("sandbox", response.getLocation());
+	}
+
+	@Test
+	public void echeckSaleWithOrderSourceSamsungPay() throws Exception {
+		EcheckSale echecksale = new EcheckSale();
+		echecksale.setAmount(123456L);
+		echecksale.setOrderId("12345");
+		echecksale.setOrderSource(OrderSourceType.SAMSUNGPAY);
+		EcheckType echeck = new EcheckType();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("12345657890");
+		echeck.setRoutingNum("123456789");
+		echeck.setCheckNum("123455");
+		echecksale.setEcheck(echeck);
+		Contact contact = new Contact();
+		contact.setName("Bob");
+		contact.setCity("lowell");
+		contact.setState("MA");
+		contact.setEmail("cnp.com");
+		echecksale.setBillToAddress(contact);
+		echecksale.setId("id");
+		EcheckSalesResponse response = cnp.echeckSale(echecksale);
+		assertEquals("Approved", response.getMessage());
+		assertEquals("sandbox", response.getLocation());
+	}
+
+	@Test
+	public void echeckSaleWithOrderSourceAmazonPay() throws Exception {
+		EcheckSale echecksale = new EcheckSale();
+		echecksale.setAmount(123456L);
+		echecksale.setOrderId("12345");
+		echecksale.setOrderSource(OrderSourceType.AMAZONPAY);
+		EcheckType echeck = new EcheckType();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("12345657890");
+		echeck.setRoutingNum("123456789");
+		echeck.setCheckNum("123455");
+		echecksale.setEcheck(echeck);
+		Contact contact = new Contact();
+		contact.setName("Bob");
+		contact.setCity("lowell");
+		contact.setState("MA");
+		contact.setEmail("cnp.com");
+		echecksale.setBillToAddress(contact);
+		echecksale.setId("id");
+		EcheckSalesResponse response = cnp.echeckSale(echecksale);
+		assertEquals("Approved", response.getMessage());
+		assertEquals("sandbox", response.getLocation());
+	}
+
+	@Test
+	public void echeckSaleWithOrderSourceGooglePay() throws Exception {
+		EcheckSale echecksale = new EcheckSale();
+		echecksale.setAmount(123456L);
+		echecksale.setOrderId("12345");
+		echecksale.setOrderSource(OrderSourceType.GOOGLEPAY);
+		EcheckType echeck = new EcheckType();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("12345657890");
+		echeck.setRoutingNum("123456789");
+		echeck.setCheckNum("123455");
+		echecksale.setEcheck(echeck);
+		Contact contact = new Contact();
+		contact.setName("Bob");
+		contact.setCity("lowell");
+		contact.setState("MA");
+		contact.setEmail("cnp.com");
+		echecksale.setBillToAddress(contact);
 		echecksale.setId("id");
 		EcheckSalesResponse response = cnp.echeckSale(echecksale);
 		assertEquals("Approved", response.getMessage());

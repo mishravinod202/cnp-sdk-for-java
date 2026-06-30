@@ -121,4 +121,50 @@ public class TestVendor {
         assertEquals("Approved", response.getMessage());
         assertEquals("sandbox", response.getLocation());
     }
+
+    // v12.50: vendorCredit now supports rtp attribute (cnpBatch change)
+
+    @Test
+    public void testVendorCreditWithRtpTrue() throws Exception {
+        VendorCredit vcredit = new VendorCredit();
+        vcredit.setReportGroup("vendorCredit");
+        vcredit.setId("111");
+        vcredit.setFundingSubmerchantId("vendorCredit");
+        vcredit.setVendorName("Vendor101");
+        vcredit.setFundsTransferId("1001");
+        vcredit.setAmount(1512L);
+        EcheckTypeCtx echeck = new EcheckTypeCtx();
+        echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+        echeck.setAccNum("123456789012");
+        echeck.setRoutingNum("114567895");
+        echeck.setCcdPaymentInformation("paymentInfo");
+        vcredit.setAccountInfo(echeck);
+        vcredit.setRtp(true);
+
+        VendorCreditResponse response = cnp.vendorCredit(vcredit);
+        assertEquals("Approved", response.getMessage());
+        assertEquals("sandbox", response.getLocation());
+    }
+
+    @Test
+    public void testVendorCreditWithRtpFalse() throws Exception {
+        VendorCredit vcredit = new VendorCredit();
+        vcredit.setReportGroup("vendorCredit");
+        vcredit.setId("111");
+        vcredit.setFundingSubmerchantId("vendorCredit");
+        vcredit.setVendorName("Vendor101");
+        vcredit.setFundsTransferId("1001");
+        vcredit.setAmount(1512L);
+        EcheckTypeCtx echeck = new EcheckTypeCtx();
+        echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+        echeck.setAccNum("123456789012");
+        echeck.setRoutingNum("114567895");
+        echeck.setCcdPaymentInformation("paymentInfo");
+        vcredit.setAccountInfo(echeck);
+        vcredit.setRtp(false);
+
+        VendorCreditResponse response = cnp.vendorCredit(vcredit);
+        assertEquals("Approved", response.getMessage());
+        assertEquals("sandbox", response.getLocation());
+    }
 }

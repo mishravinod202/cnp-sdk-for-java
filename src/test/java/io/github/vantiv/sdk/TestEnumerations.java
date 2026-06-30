@@ -130,4 +130,34 @@ public class TestEnumerations {
 		capturegivenauth.setProcessingType(ProcessingTypeEnum.CARDHOLDER_INITIATED_COF);
 	}
 
+	// ── v12.50: new orderSourceType values ────────────────────────────────────
+
+	@Test
+	public void orderSourcePaze() {
+		EcheckSale info = new EcheckSale();
+		info.setOrderSource(OrderSourceType.PAZE);
+		assertEquals(OrderSourceType.PAZE, info.getOrderSource());
+	}
+
+	@Test
+	public void orderSourceSamsungPay() {
+		Sale info = new Sale();
+		info.setOrderSource(OrderSourceType.SAMSUNGPAY);
+		assertEquals(OrderSourceType.SAMSUNGPAY, info.getOrderSource());
+	}
+
+	@Test
+	public void orderSourceAmazonPay() {
+		Authorization info = new Authorization();
+		info.setOrderSource(OrderSourceType.AMAZONPAY);
+		assertEquals(OrderSourceType.AMAZONPAY, info.getOrderSource());
+	}
+
+	@Test
+	public void orderSourceGooglePay() {
+		Authorization info = new Authorization();
+		info.setOrderSource(OrderSourceType.GOOGLEPAY);
+		assertEquals(OrderSourceType.GOOGLEPAY, info.getOrderSource());
+	}
+
 }

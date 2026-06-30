@@ -17,6 +17,7 @@ import java.util.GregorianCalendar;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.matches;
@@ -2768,6 +2769,444 @@ public class TestCnpOnline {
 		assertEquals(5, advancedFraudResultsType.getTriggeredRules().size());
 		assertEquals("sandbox", fraudCheckResponse.getLocation());
 	}
+
+	// ── v12.50: queryDpoWalletBalance tests ───────────────────────────────────
+
+	@Test
+	public void testQueryDpoWalletBalance() throws Exception {
+		QueryDpoWalletBalance queryDpoWalletBalance = new QueryDpoWalletBalance();
+		queryDpoWalletBalance.setReportGroup("Default");
+		queryDpoWalletBalance.setId("id");
+
+		Communication mockedCommunication = mock(Communication.class);
+		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+			when(mockedCommunication.requestToServer(matches("(?s).*?<cnpOnlineRequest.*?<encryptedPayload>(.*?)</encryptedPayload>.*?\n"), any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<queryDpoWalletBalanceResponse id='id' reportGroup='Default'>" +
+							"<cnpTxnId>123456</cnpTxnId><response>000</response>" +
+							"<responseTime>2024-01-01T12:00:00</responseTime><message>Approved</message>" +
+							"</queryDpoWalletBalanceResponse></cnpOnlineResponse>");
+		} else {
+			when(mockedCommunication.requestToServer(
+					matches("(?s).*?<cnpOnlineRequest.*?queryDpoWalletBalance.*"),
+					any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<queryDpoWalletBalanceResponse id='id' reportGroup='Default'>" +
+							"<cnpTxnId>123456</cnpTxnId><response>000</response>" +
+							"<responseTime>2024-01-01T12:00:00</responseTime><message>Approved</message>" +
+							"</queryDpoWalletBalanceResponse></cnpOnlineResponse>");
+		}
+		cnp.setCommunication(mockedCommunication);
+		QueryDpoWalletBalanceResponse response = cnp.queryDpoWalletBalance(queryDpoWalletBalance);
+		assertEquals(123456L, response.getCnpTxnId());
+		assertEquals("000", response.getResponse());
+		assertEquals("Approved", response.getMessage());
+	}
+
+	@Test
+	public void testQueryDpoWalletBalanceWithAllResponseFields() throws Exception {
+		QueryDpoWalletBalance queryDpoWalletBalance = new QueryDpoWalletBalance();
+		queryDpoWalletBalance.setReportGroup("Default");
+		queryDpoWalletBalance.setId("id");
+
+		Communication mockedCommunication = mock(Communication.class);
+		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+			when(mockedCommunication.requestToServer(matches("(?s).*?<cnpOnlineRequest.*?<encryptedPayload>(.*?)</encryptedPayload>.*?\n"), any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<queryDpoWalletBalanceResponse id='id' reportGroup='Default'>" +
+							"<cnpTxnId>123456</cnpTxnId><response>000</response>" +
+							"<responseTime>2024-01-01T12:00:00</responseTime><message>Approved</message>" +
+							"<projectedAvailableBalance>5000</projectedAvailableBalance>" +
+							"<reserveBalance>1000</reserveBalance>" +
+							"<availableRtpBalance>4000</availableRtpBalance>" +
+							"<asOfDate>2024-01-01T10:00:00</asOfDate>" +
+							"<lastUpdatedDate>2024-01-01T11:00:00</lastUpdatedDate>" +
+							"</queryDpoWalletBalanceResponse></cnpOnlineResponse>");
+		} else {
+			when(mockedCommunication.requestToServer(
+					matches("(?s).*?<cnpOnlineRequest.*?queryDpoWalletBalance.*"),
+					any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<queryDpoWalletBalanceResponse id='id' reportGroup='Default'>" +
+							"<cnpTxnId>123456</cnpTxnId><response>000</response>" +
+							"<responseTime>2024-01-01T12:00:00</responseTime><message>Approved</message>" +
+							"<projectedAvailableBalance>5000</projectedAvailableBalance>" +
+							"<reserveBalance>1000</reserveBalance>" +
+							"<availableRtpBalance>4000</availableRtpBalance>" +
+							"<asOfDate>2024-01-01T10:00:00</asOfDate>" +
+							"<lastUpdatedDate>2024-01-01T11:00:00</lastUpdatedDate>" +
+							"</queryDpoWalletBalanceResponse></cnpOnlineResponse>");
+		}
+		cnp.setCommunication(mockedCommunication);
+		QueryDpoWalletBalanceResponse response = cnp.queryDpoWalletBalance(queryDpoWalletBalance);
+		assertEquals(123456L, response.getCnpTxnId());
+		assertEquals("000", response.getResponse());
+		assertEquals("Approved", response.getMessage());
+		assertEquals(5000L, response.getProjectedAvailableBalance().longValue());
+		assertEquals(1000L, response.getReserveBalance().longValue());
+		assertEquals(4000L, response.getAvailableRtpBalance().longValue());
+	}
+
+	// ── v12.50: vendorCredit rtp attribute (cnpBatch change) ─────────────────
+
+	@Test
+	public void testVendorCreditWithRtpTrue() throws Exception {
+		VendorCredit vcredit = new VendorCredit();
+		vcredit.setReportGroup("vendorCredit");
+		vcredit.setId("111");
+		vcredit.setFundingSubmerchantId("vendorCredit");
+		vcredit.setVendorName("Vendor101");
+		vcredit.setFundsTransferId("1001");
+		vcredit.setAmount(1512L);
+		EcheckTypeCtx echeck = new EcheckTypeCtx();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("123456789012");
+		echeck.setRoutingNum("114567895");
+		echeck.setCcdPaymentInformation("paymentInfo");
+		vcredit.setAccountInfo(echeck);
+		vcredit.setRtp(true);
+
+		Communication mockedCommunication = mock(Communication.class);
+		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+			when(mockedCommunication.requestToServer(matches("(?s).*?<cnpOnlineRequest.*?<encryptedPayload>(.*?)</encryptedPayload>.*?\n"), any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<vendorCreditResponse><cnpTxnId>123</cnpTxnId><response>000</response>" +
+							"<responseTime>2024-01-01T12:00:00</responseTime><message>Approved</message>" +
+							"<location>sandbox</location></vendorCreditResponse></cnpOnlineResponse>");
+		} else {
+			when(mockedCommunication.requestToServer(
+					matches("(?s).*?<cnpOnlineRequest.*?<vendorCredit.*?rtp=\"true\".*?</vendorCredit>.*"),
+					any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<vendorCreditResponse><cnpTxnId>123</cnpTxnId><response>000</response>" +
+							"<responseTime>2024-01-01T12:00:00</responseTime><message>Approved</message>" +
+							"<location>sandbox</location></vendorCreditResponse></cnpOnlineResponse>");
+		}
+		cnp.setCommunication(mockedCommunication);
+		VendorCreditResponse response = cnp.vendorCredit(vcredit);
+		assertEquals(123L, response.getCnpTxnId());
+		assertEquals("sandbox", response.getLocation());
+		assertEquals(true, vcredit.isRtp());
+	}
+
+	@Test
+	public void testVendorCreditWithRtpFalse() throws Exception {
+		VendorCredit vcredit = new VendorCredit();
+		vcredit.setReportGroup("vendorCredit");
+		vcredit.setId("111");
+		vcredit.setFundingSubmerchantId("vendorCredit");
+		vcredit.setVendorName("Vendor101");
+		vcredit.setFundsTransferId("1001");
+		vcredit.setAmount(1512L);
+		EcheckTypeCtx echeck = new EcheckTypeCtx();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("123456789012");
+		echeck.setRoutingNum("114567895");
+		echeck.setCcdPaymentInformation("paymentInfo");
+		vcredit.setAccountInfo(echeck);
+		vcredit.setRtp(false);
+
+		Communication mockedCommunication = mock(Communication.class);
+		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+			when(mockedCommunication.requestToServer(matches("(?s).*?<cnpOnlineRequest.*?<encryptedPayload>(.*?)</encryptedPayload>.*?\n"), any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<vendorCreditResponse><cnpTxnId>123</cnpTxnId><response>000</response>" +
+							"<responseTime>2024-01-01T12:00:00</responseTime><message>Approved</message>" +
+							"<location>sandbox</location></vendorCreditResponse></cnpOnlineResponse>");
+		} else {
+			when(mockedCommunication.requestToServer(
+					matches("(?s).*?<cnpOnlineRequest.*?<vendorCredit.*?rtp=\"false\".*?</vendorCredit>.*"),
+					any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<vendorCreditResponse><cnpTxnId>123</cnpTxnId><response>000</response>" +
+							"<responseTime>2024-01-01T12:00:00</responseTime><message>Approved</message>" +
+							"<location>sandbox</location></vendorCreditResponse></cnpOnlineResponse>");
+		}
+		cnp.setCommunication(mockedCommunication);
+		VendorCreditResponse response = cnp.vendorCredit(vcredit);
+		assertEquals(123L, response.getCnpTxnId());
+		assertEquals("sandbox", response.getLocation());
+		assertEquals(false, vcredit.isRtp());
+	}
+
+	@Test
+	public void testVendorCreditWithoutRtp() throws Exception {
+		VendorCredit vcredit = new VendorCredit();
+		vcredit.setReportGroup("vendorCredit");
+		vcredit.setId("111");
+		vcredit.setFundingSubmerchantId("vendorCredit");
+		vcredit.setVendorName("Vendor101");
+		vcredit.setFundsTransferId("1001");
+		vcredit.setAmount(1512L);
+		EcheckTypeCtx echeck = new EcheckTypeCtx();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("123456789012");
+		echeck.setRoutingNum("114567895");
+		echeck.setCcdPaymentInformation("paymentInfo");
+		vcredit.setAccountInfo(echeck);
+
+		Communication mockedCommunication = mock(Communication.class);
+		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+			when(mockedCommunication.requestToServer(matches("(?s).*?<cnpOnlineRequest.*?<encryptedPayload>(.*?)</encryptedPayload>.*?\n"), any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<vendorCreditResponse><cnpTxnId>123</cnpTxnId><response>000</response>" +
+							"<responseTime>2024-01-01T12:00:00</responseTime><message>Approved</message>" +
+							"<location>sandbox</location></vendorCreditResponse></cnpOnlineResponse>");
+		} else {
+			when(mockedCommunication.requestToServer(
+					matches("(?s).*?<cnpOnlineRequest.*?<vendorCredit(?!.*rtp).*?</vendorCredit>.*"),
+					any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<vendorCreditResponse><cnpTxnId>123</cnpTxnId><response>000</response>" +
+							"<responseTime>2024-01-01T12:00:00</responseTime><message>Approved</message>" +
+							"<location>sandbox</location></vendorCreditResponse></cnpOnlineResponse>");
+		}
+		cnp.setCommunication(mockedCommunication);
+		VendorCreditResponse response = cnp.vendorCredit(vcredit);
+		assertEquals(123L, response.getCnpTxnId());
+		assertEquals("sandbox", response.getLocation());
+		assertNull(vcredit.isRtp());
+	}
+
+	// ── v12.50: identityBundle on echeck transactions ─────────────────────────
+
+	@Test
+	public void testEcheckSaleWithIdentityBundle() throws Exception {
+		EcheckSale echecksale = new EcheckSale();
+		echecksale.setAmount(123456L);
+		echecksale.setSecondaryAmount(10L);
+		echecksale.setOrderId("12345");
+		echecksale.setOrderSource(OrderSourceType.ECOMMERCE);
+		EcheckType echeck = new EcheckType();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("12345657890");
+		echeck.setRoutingNum("123456789");
+		echeck.setCheckNum("123455");
+		echecksale.setEcheck(echeck);
+		Contact contact = new Contact();
+		contact.setName("Bob");
+		contact.setCity("lowell");
+		contact.setState("MA");
+		contact.setEmail("cnp.com");
+		echecksale.setBillToAddress(contact);
+		IdentityBundle identityBundle = new IdentityBundle();
+		identityBundle.setMerchantId("12222");
+		identityBundle.setEntityId("222222");
+		identityBundle.setEntityReference("32222");
+		identityBundle.setResourceId("422222");
+		identityBundle.setResourceReference("52222");
+		identityBundle.setCommandId("6222");
+		identityBundle.setCommandReference("72222");
+		echecksale.setIdentityBundle(identityBundle);
+
+		Communication mockedCommunication = mock(Communication.class);
+		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+			when(mockedCommunication.requestToServer(matches("(?s).*?<cnpOnlineRequest.*?<encryptedPayload>(.*?)</encryptedPayload>.*?\n"), any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'><echeckSalesResponse><cnpTxnId>123</cnpTxnId><location>sandbox</location></echeckSalesResponse></cnpOnlineResponse>");
+		} else {
+			when(mockedCommunication.requestToServer(
+					matches(".*?<cnpOnlineRequest.*?<echeckSale.*?<identityBundle>.*?<merchantId>12222</merchantId>.*?</identityBundle>.*?</echeckSale>.*?"),
+					any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'><echeckSalesResponse><cnpTxnId>123</cnpTxnId><location>sandbox</location></echeckSalesResponse></cnpOnlineResponse>");
+		}
+		cnp.setCommunication(mockedCommunication);
+		EcheckSalesResponse echecksaleresponse = cnp.echeckSale(echecksale);
+		assertEquals(123L, echecksaleresponse.getCnpTxnId());
+		assertEquals("sandbox", echecksaleresponse.getLocation());
+		assertEquals("12222", echecksale.getIdentityBundle().getMerchantId());
+	}
+
+	@Test
+	public void testEcheckCreditWithIdentityBundleByCnpTxnId() throws Exception {
+		EcheckCredit echeckcredit = new EcheckCredit();
+		echeckcredit.setAmount(12L);
+		echeckcredit.setSecondaryAmount(10L);
+		echeckcredit.setCnpTxnId(123456789101112L);
+		IdentityBundle identityBundle = new IdentityBundle();
+		identityBundle.setMerchantId("12222");
+		identityBundle.setEntityId("222222");
+		identityBundle.setEntityReference("32222");
+		identityBundle.setResourceId("422222");
+		identityBundle.setResourceReference("52222");
+		identityBundle.setCommandId("6222");
+		identityBundle.setCommandReference("72222");
+		echeckcredit.setIdentityBundle(identityBundle);
+
+		Communication mockedCommunication = mock(Communication.class);
+		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+			when(mockedCommunication.requestToServer(matches("(?s).*?<cnpOnlineRequest.*?<encryptedPayload>(.*?)</encryptedPayload>.*?\n"), any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'><echeckCreditResponse><cnpTxnId>123</cnpTxnId><location>sandbox</location></echeckCreditResponse></cnpOnlineResponse>");
+		} else {
+			when(mockedCommunication.requestToServer(
+					matches(".*?<cnpOnlineRequest.*?<echeckCredit.*?<identityBundle>.*?<merchantId>12222</merchantId>.*?</identityBundle>.*?</echeckCredit>.*?"),
+					any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'><echeckCreditResponse><cnpTxnId>123</cnpTxnId><location>sandbox</location></echeckCreditResponse></cnpOnlineResponse>");
+		}
+		cnp.setCommunication(mockedCommunication);
+		EcheckCreditResponse echeckcreditresponse = cnp.echeckCredit(echeckcredit);
+		assertEquals(123L, echeckcreditresponse.getCnpTxnId());
+		assertEquals("sandbox", echeckcreditresponse.getLocation());
+		assertEquals("12222", echeckcredit.getIdentityBundle().getMerchantId());
+	}
+
+	@Test
+	public void testEcheckCreditWithIdentityBundleByOrderId() throws Exception {
+		EcheckCredit echeckcredit = new EcheckCredit();
+		echeckcredit.setAmount(12L);
+		echeckcredit.setOrderId("12345");
+		echeckcredit.setOrderSource(OrderSourceType.ECOMMERCE);
+		EcheckType echeck = new EcheckType();
+		echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+		echeck.setAccNum("12345657890");
+		echeck.setRoutingNum("123456789");
+		echeck.setCheckNum("123455");
+		echeckcredit.setEcheck(echeck);
+		Contact billToAddress = new Contact();
+		billToAddress.setName("Bob");
+		billToAddress.setCity("Lowell");
+		billToAddress.setState("MA");
+		billToAddress.setEmail("cnp.com");
+		echeckcredit.setBillToAddress(billToAddress);
+		IdentityBundle identityBundle = new IdentityBundle();
+		identityBundle.setMerchantId("12222");
+		identityBundle.setEntityId("222222");
+		identityBundle.setEntityReference("32222");
+		identityBundle.setResourceId("422222");
+		identityBundle.setResourceReference("52222");
+		identityBundle.setCommandId("6222");
+		identityBundle.setCommandReference("72222");
+		echeckcredit.setIdentityBundle(identityBundle);
+
+		Communication mockedCommunication = mock(Communication.class);
+		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+			when(mockedCommunication.requestToServer(matches("(?s).*?<cnpOnlineRequest.*?<encryptedPayload>(.*?)</encryptedPayload>.*?\n"), any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'><echeckCreditResponse><cnpTxnId>123</cnpTxnId><location>sandbox</location></echeckCreditResponse></cnpOnlineResponse>");
+		} else {
+			when(mockedCommunication.requestToServer(
+					matches(".*?<cnpOnlineRequest.*?<echeckCredit.*?<identityBundle>.*?<merchantId>12222</merchantId>.*?</identityBundle>.*?</echeckCredit>.*?"),
+					any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'><echeckCreditResponse><cnpTxnId>123</cnpTxnId><location>sandbox</location></echeckCreditResponse></cnpOnlineResponse>");
+		}
+		cnp.setCommunication(mockedCommunication);
+		EcheckCreditResponse echeckcreditresponse = cnp.echeckCredit(echeckcredit);
+		assertEquals(123L, echeckcreditresponse.getCnpTxnId());
+		assertEquals("sandbox", echeckcreditresponse.getLocation());
+		assertEquals("12222", echeckcredit.getIdentityBundle().getMerchantId());
+	}
+
+	@Test
+	public void testEcheckRedepositWithIdentityBundle() throws Exception {
+		EcheckRedeposit echeckredeposit = new EcheckRedeposit();
+		echeckredeposit.setCnpTxnId(123456L);
+		IdentityBundle identityBundle = new IdentityBundle();
+		identityBundle.setMerchantId("12222");
+		identityBundle.setEntityId("222222");
+		identityBundle.setEntityReference("32222");
+		identityBundle.setResourceId("422222");
+		identityBundle.setResourceReference("52222");
+		identityBundle.setCommandId("6222");
+		identityBundle.setCommandReference("72222");
+		echeckredeposit.setIdentityBundle(identityBundle);
+
+		Communication mockedCommunication = mock(Communication.class);
+		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+			when(mockedCommunication.requestToServer(matches("(?s).*?<cnpOnlineRequest.*?<encryptedPayload>(.*?)</encryptedPayload>.*?\n"), any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'><echeckRedepositResponse><cnpTxnId>123</cnpTxnId><location>sandbox</location></echeckRedepositResponse></cnpOnlineResponse>");
+		} else {
+			when(mockedCommunication.requestToServer(
+					matches(".*?<cnpOnlineRequest.*?<echeckRedeposit.*?<identityBundle>.*?<merchantId>12222</merchantId>.*?</identityBundle>.*?</echeckRedeposit>.*?"),
+					any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'><echeckRedepositResponse><cnpTxnId>123</cnpTxnId><location>sandbox</location></echeckRedepositResponse></cnpOnlineResponse>");
+		}
+		cnp.setCommunication(mockedCommunication);
+		EcheckRedepositResponse echeckredepositresponse = cnp.echeckRedeposit(echeckredeposit);
+		assertEquals(123L, echeckredepositresponse.getCnpTxnId());
+		assertEquals("sandbox", echeckredepositresponse.getLocation());
+		assertEquals("12222", echeckredeposit.getIdentityBundle().getMerchantId());
+	}
+
+	// ── v12.50: new orderSourceType values ────────────────────────────────────
+
+	@Test
+	public void testOrderSourcePaze() throws Exception {
+		Authorization authorization = new Authorization();
+		authorization.setReportGroup("Planets");
+		authorization.setOrderId("12344");
+		authorization.setAmount(106L);
+		authorization.setOrderSource(OrderSourceType.PAZE);
+		CardType card = new CardType();
+		card.setType(MethodOfPaymentTypeEnum.VI);
+		card.setNumber("4100000000000002");
+		card.setExpDate("1210");
+		authorization.setCard(card);
+		helperMethodForAuth();
+		cnp.setCommunication(mockedCommunication);
+		AuthorizationResponse authorize = cnp.authorize(authorization);
+		assertEquals(123L, authorize.getCnpTxnId());
+		assertEquals(OrderSourceType.PAZE, authorization.getOrderSource());
+		assertEquals("sandbox", authorize.getLocation());
+	}
+
+	@Test
+	public void testOrderSourceSamsungPay() throws Exception {
+		Authorization authorization = new Authorization();
+		authorization.setReportGroup("Planets");
+		authorization.setOrderId("12344");
+		authorization.setAmount(106L);
+		authorization.setOrderSource(OrderSourceType.SAMSUNGPAY);
+		CardType card = new CardType();
+		card.setType(MethodOfPaymentTypeEnum.VI);
+		card.setNumber("4100000000000002");
+		card.setExpDate("1210");
+		authorization.setCard(card);
+		helperMethodForAuth();
+		cnp.setCommunication(mockedCommunication);
+		AuthorizationResponse authorize = cnp.authorize(authorization);
+		assertEquals(123L, authorize.getCnpTxnId());
+		assertEquals(OrderSourceType.SAMSUNGPAY, authorization.getOrderSource());
+		assertEquals("sandbox", authorize.getLocation());
+	}
+
+	@Test
+	public void testOrderSourceAmazonPay() throws Exception {
+		Authorization authorization = new Authorization();
+		authorization.setReportGroup("Planets");
+		authorization.setOrderId("12344");
+		authorization.setAmount(106L);
+		authorization.setOrderSource(OrderSourceType.AMAZONPAY);
+		CardType card = new CardType();
+		card.setType(MethodOfPaymentTypeEnum.VI);
+		card.setNumber("4100000000000002");
+		card.setExpDate("1210");
+		authorization.setCard(card);
+		helperMethodForAuth();
+		cnp.setCommunication(mockedCommunication);
+		AuthorizationResponse authorize = cnp.authorize(authorization);
+		assertEquals(123L, authorize.getCnpTxnId());
+		assertEquals(OrderSourceType.AMAZONPAY, authorization.getOrderSource());
+		assertEquals("sandbox", authorize.getLocation());
+	}
+
+	@Test
+	public void testOrderSourceGooglePay() throws Exception {
+		Authorization authorization = new Authorization();
+		authorization.setReportGroup("Planets");
+		authorization.setOrderId("12344");
+		authorization.setAmount(106L);
+		authorization.setOrderSource(OrderSourceType.GOOGLEPAY);
+		CardType card = new CardType();
+		card.setType(MethodOfPaymentTypeEnum.VI);
+		card.setNumber("4100000000000002");
+		card.setExpDate("1210");
+		authorization.setCard(card);
+		helperMethodForAuth();
+		cnp.setCommunication(mockedCommunication);
+		AuthorizationResponse authorize = cnp.authorize(authorization);
+		assertEquals(123L, authorize.getCnpTxnId());
+		assertEquals(OrderSourceType.GOOGLEPAY, authorization.getOrderSource());
+		assertEquals("sandbox", authorize.getLocation());
+	}
+
 	public void helperMethodForAuth() {
 		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
 			when(

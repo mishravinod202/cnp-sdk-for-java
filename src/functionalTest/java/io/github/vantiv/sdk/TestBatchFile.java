@@ -2703,4 +2703,68 @@ public class TestBatchFile {
         t.testSendToCnp_WithConfigOverrides();
     }
 
+    // v12.50: vendorCredit gains rtp attribute (cnpBatch XSD change)
+
+    @Test
+    public void testBatchVendorCreditWithRtp() {
+        Assume.assumeFalse(preliveStatus.equalsIgnoreCase("down"));
+
+        String requestFileName = "cnpSdk-testBatchFile-VendorCreditRtp-" + TIME_STAMP + ".xml";
+        CnpBatchFileRequest request = new CnpBatchFileRequest(requestFileName);
+        Properties configFromFile = request.getConfig();
+        assertEquals("payments.vantivprelive.com", configFromFile.getProperty("batchHost"));
+
+        CnpBatchRequest batch = request.createBatch(configFromFile.getProperty("merchantId"));
+
+        EcheckTypeCtx echeck = new EcheckTypeCtx();
+        echeck.setAccType(EcheckAccountTypeEnum.CHECKING);
+        echeck.setAccNum("123456789012");
+        echeck.setRoutingNum("114567895");
+        echeck.setCcdPaymentInformation("paymentInfo");
+
+        VendorCredit vcreditRtpTrue = new VendorCredit();
+        vcreditRtpTrue.setReportGroup("vendorCredit");
+        vcreditRtpTrue.setId("rtp-true-1");
+        vcreditRtpTrue.setFundingSubmerchantId("vendorCredit");
+        vcreditRtpTrue.setVendorName("Vendor101");
+        vcreditRtpTrue.setFundsTransferId("1001");
+        vcreditRtpTrue.setAmount(1000L);
+        vcreditRtpTrue.setAccountInfo(echeck);
+        vcreditRtpTrue.setRtp(true);
+        batch.addTransaction(vcreditRtpTrue);
+
+        VendorCredit vcreditRtpFalse = new VendorCredit();
+        vcreditRtpFalse.setReportGroup("vendorCredit");
+        vcreditRtpFalse.setId("rtp-false-1");
+        vcreditRtpFalse.setFundingSubmerchantId("vendorCredit");
+        vcreditRtpFalse.setVendorName("Vendor102");
+        vcreditRtpFalse.setFundsTransferId("1002");
+        vcreditRtpFalse.setAmount(2000L);
+        vcreditRtpFalse.setAccountInfo(echeck);
+        vcreditRtpFalse.setRtp(false);
+        batch.addTransaction(vcreditRtpFalse);
+
+        int transactionCount = batch.getNumberOfTransactions();
+
+        CnpBatchFileResponse fileResponse = request.sendToCnpSFTP();
+        CnpBatchResponse batchResponse = fileResponse.getNextCnpBatchResponse();
+
+        final boolean[] responseReceived = new boolean[]{false};
+        CnpResponseProcessor processor = new CnpResponseProcessorAdapter() {
+            @Override
+            public void processVendorCreditResponse(VendorCreditResponse vendorCreditResponse) {
+                assertNotNull(vendorCreditResponse.getCnpTxnId());
+                responseReceived[0] = true;
+            }
+        };
+
+        int txns = 0;
+        while (batchResponse.processNextTransaction(processor)) {
+            txns++;
+        }
+
+        assertTrue(responseReceived[0]);
+        assertEquals(transactionCount, txns);
+    }
+
 }

@@ -1,0 +1,637 @@
+# Vantiv eCommerce CNP CHANGELOG
+
+## Change Log for 12.50 (June 26, 2026)
+
+- Change: Added ANT commands to enable support for Integer values in enumeration definitions
+- Change: [cnpAPI v12.50]: New transaction type 'queryDpoWalletBalance' added to cnpOnlineRequest.
+- Change: [cnpAPI v12.50]: New response type 'queryDpoWalletBalanceResponse' added with elements 'projectedAvailableBalance', 'reserveBalance', 'availableRtpBalance', 'asOfDate', and 'lastUpdatedDate'.
+- Change: [cnpAPI v12.50]: New complex element 'identityBundle' added to 'echeckSale' (orderId sequence), 'echeckCredit' (both cnpTxnId and orderId paths), and 'echeckRedeposit' requests.
+- Change: [cnpAPI v12.50]: In existing enum 'orderSourceType' four new values added — 'paze', 'samsungpay', 'amazonpay', 'googlepay'.
+- Change: [cnpAPI v12.50]: In existing request 'vendorCredit' base type changed from 'transactionTypeWithReportGroup' to 'transactionTypeWithReportGroupAndRtp', adding optional boolean attribute 'rtp'.
+- Change: Upgraded httpclient5 5.2.1 to 5.2.3.
+- Change: Upgraded jaxb-impl 2.3.4 to 2.3.5.
+- Change: Upgraded mockito-core 4.11.0 to 5.7.0.
+
+## Change Log for 12.49 (January 23, 2026)
+
+- Change: [cnpAPI v12.49]: New simple element 'preferredCustomer' of type 'boolean' is added in  'authorization' and 'sale' request.
+- Change: [cnpAPI v12.49]: New simple element 'preferredCustomerDecision' of type 'boolean' is added in Authorization and sale response.
+- Change: [cnpAPI v12.49]: New complex element 'tlid' is added in sale response.
+- Change: [cnpAPI v12.49]: In existing enum 'tlidValidationActionIndicatorType' new value "3" is added.
+- Change: [cnpAPI v12.49]: for existing request "reserveCredit" base type is changed from 'transactionTypeWithReportGroupAndRtp' to 'transactionTypeWithReportGroup'
+
+## Change Log for 12.48 (October 29, 2025)
+
+* Change: [cnpAPI v12.48] New element pazeEncryptedPayload added to both Auth and Sale transaction requests.
+* Change: [cnpAPI v12.48] New complex element TLID added in authResponse and authReversalResponse.
+* Change: [cnpAPI v12.48] New sub elements to support TLID - lifecycleTlid (type: tlidType),economicTlid (type: tlidType)
+  ,tlidCustomerProvided (type: tlidType) and tlidValidationActionIndicator (type: tlidValidationActionIndicatorType)
+* Change: [cnpAPI v12.48] New element tlidValidationActionIndicatorType added with Enum values 1, 2.
+* Change: [cnpAPI v12.48] New type tlidType added as string for TLID fields.
+
+## Change Log for 12.47 (July 28, 2025)
+
+* Change: [cnpAPI v12.47] New header 'X-Ecom-Api' is added in the request on the basis 2 cofiguration newly added properties in the property
+  file 'sendEcomHeader' and 'ecomHeaderValue'.
+* Change: [cnpAPI v12.47] New enum 'numberOfPaymentsEnum' added with values '1','2','3','4','5','6','7','8','9','+' .
+* Change: [cnpAPI v12.47] New enum 'lineItemDetailIndicatorEnum' added with values '0','1','2','3','4','5'.
+* Change: [cnpAPI v12.47] In existing complex element lineItemData new enum 'lineItemDetailIndicator' of type 'lineItemDetailIndicatorEnum'
+  is added.
+* Change: [cnpAPI v12.47] In existing complex element 'numberOfPayments' new enum 'numberOfPayments' of type 'numberOfPaymentsEnum' is
+  added.
+* Change: [cnpAPI v12.46] In 'AuthorizationResponse' and 'SaleResponse' simple elements 'credentialType' of type 'string' and 'cardDetails'
+  of type 'ccAccountNumberType' are added.
+* Change: [cnpAPI v12.46] In existing complex element 'accountFundingTransactionData' two simple elements 'receiverAccountNumber' of type '
+  string50Type' and 'receiverAccountNumberCnpToken' of type 'ccAccountNumberType' are added as choice.
+
+## Change Log for 12.45 (May 22, 2025)
+
+* Change: [cnpAPI v12.45] In existing enum 'foreignRetailerIndicatorEnum' new values 'A','B'.
+* Change: [cnpAPI v12.45] In existing authorization request new element 'foreignRetailerIndicator' of type 'foreignRetailerIndicatorEnum' is
+  added in orderId sequence.
+* Change: [cnpAPI v12.45] In existing element 'typeOfDigitalCurrency' is modified to support only these value '1','2','3','4','7'.
+
+## Change Log for 12.44.1 (March 06, 2025)
+
+* Change: Upgraded commons-io 2.11.0 to commons-io 2.18.0 to fix BD vulnerability.
+
+## Change Log for 12.44 (March 04, 2025)
+
+* Change: [cnpAPI v12.44] In ordersourcetype enum, 'ecommerceDataOnly' value is added.
+
+## Change Log for 12.43 [Only for Worldpay Internal Usage]
+
+* Change: [cnpAPI v12.43] Two new elements cumulativeAmount,originalTransactionAmount added in realtimeIncrementalAuthorization.
+* Change: [cnpAPI v12.43] In enum networkFieldNameEnumType,'Additional Request Data' value is added.
+
+## Change Log for 12.42 [Only for Worldpay Internal Usage]
+
+* Change: [cnpAPI v12.42] For all child elements of identityBundle minOccurs changed to 0 from 1.
+* Change: [cnpAPI v12.42] New Transaction type realtimeIncrementalAuthorization added.
+* Change: [cnpAPI v12.42] New element originalRetrievalReferenceNumber added in authorization request.
+
+## Change Log for 12.41
+
+* Change: [cnpAPI v12.41] In authorization,authReversal,capture,sale,credit,depositTransactionReversal,refundTransactionReversal new complex
+  type element added - identityBundle.
+* Change: [cnpAPI v12.41] New complex type element identityBundle with child
+  elements-merchantId,entityId,entityReference,resourceId,resourceReference,commandId,commandReference,orderReference with minOccurs as 1.
+* Change: [cnpAPI v12.41] New elements are added in authorizationResponse,saleResponse -retrievalReferenceNumber of type string12Type
+  ,orderSource of type orderSourceType.
+* Change: [cnpAPI v12.41] New datatype- string12Type - of string type of length 12 to support retrievalReferenceNumber element .
+* Change: [cnpAPI v12.41] For existing element cardSuffixType maxLength is increased to 23
+
+## Change Log for 12.40(September 30, 2024)
+
+* Change: [cnpAPI v12.40] In authorization,sale and captureGivenAuth request new elements added-> 'typeOfDigitalCurrency' and '
+  conversionAffiliateId'.
+* Change: [cnpAPI v12.40] In existing simple type transactionAmountType range added between minInclusive value -999999999999 and
+  maxInclusive value 999999999999
+* Change: [cnpAPI v12.40] In existing type authenticationProtocolVersionType new values '3','4','5','6','7','8' and '9' are added
+
+## Change Log for 12.39
+
+* Change: [cnpAPI v12.39] In 'subMerchantCredit' 'payFacCredit','reserveCredit', 'payoutOrgCreditRequest' base changed from '
+  transactionTypeWithReportGroup' to 'transactionTypeWithReportGroupAndRtp'.
+* Change: [cnpAPI v12.39] To support new changed extension base for above txns ,New Complextype 'transactionTypeWithReportGroupAndRtp'
+  added.
+* Change: [cnpAPI v12.39] New element 'fundingTransactionReferenceNumber' in authorization and sale response.
+
+## Change Log for 12.38
+
+* Change: [cnpAPI v12.38] In existing Enum 'ActionTypeEnum' new value 'FIVD' added
+* Change: [cnpAPI v12.38] In existing complex element 'baseRequest' two more choices are added 'encryptionKeyRequest' and 'encryptedPayload'
+* Change: [cnpAPI v12.38] In existing complex element 'cnpOnlineResponse' one more choice is added 'encryptionKeyResponse'
+* Change: [cnpAPI v12.38] New element 'encryptionKeyRequest' is added of type 'encryptionKeyRequestEnum'
+* Change: [cnpAPI v12.38] To support 'encryptionKeyRequest' new Enum 'encryptionKeyRequestEnum' added with values 'CURRENT' and 'PREVIOUS'
+* Change: [cnpAPI v12.38] New complex element 'encryptionKeyResponse' is added with simple elements ->'encryptionKeySequence' of type '
+  encryptionKeySequenceType' and 'encryptionKey' of type 'encryptionKeyType'
+* Change: [cnpAPI v12.38] To support 'encryptionKeySequence' new simple type 'encryptionKeySequenceType' added with total Digits 19
+* Change: [cnpAPI v12.38] To support 'encryptionKey' new simple type 'encryptionKeyType' of type string with maxLength 15000
+* Change: [cnpAPI v12.38] New complex element 'encryptedPayload' is added with simple elements ->'encryptionKeySequence' of type '
+  encryptionKeySequenceType' and 'payload' of type 'payloadType'
+* Change: [cnpAPI v12.38] To support 'payload' new simple type 'payloadType' of type string with maxLength 15000
+* Change: [cnpAPI v12.38] In capture Request new complex element 'partialCapture' is added with elements-> 'partialCaptureSequenceNumber' of
+  type 'integer' and 'partialCaptureTotalCount' of type 'partialCaptureCount'
+
+## Version 12.37.1 (v12.37.1)(June 25, 2024)
+
+* Change: [cnpAPI v12.37.1] Change: cnp-sdk-for-java is upgraded to work with Java 8 compatibility.
+
+## Version 12.37.0 (v12.37.0)(May 29, 2024)
+
+* Change: [cnpAPI v12.37] New existing 'postCheckoutRedirectUrl' with min length '1' and maxlength '200'
+* Change: [cnpAPI v12.37] New enum 'provider' is added with value 'AFFIRM'
+* Change: [cnpAPI v12.37] New complex type 'inquiryResultType' is added with simple element 'response' of 'responseType' and 'message' of '
+  messageType'.
+* Change: [cnpAPI v12.37] New complex element 'BNPLAuthorizationRequest' is added with added with few simple elements and few complex
+  elements- simple elements 'amount','orderId' ,'provider' of type 'provider' and complex elements 'customerInfo','billToAddress','
+  shipToAddress','enhancedData','postCheckoutRedirectUrl'
+* Change: [cnpAPI v12.37] New complex element 'BNPLAuthResponse' is added with few simple elements ,existing simple elements 'cnpTxnId','
+  response','responseTime','message','location' and 'checkoutUrl'
+* Change: [cnpAPI v12.37] New complex element 'BNPLCaptureRequest' is added with existing simple element 'amount','orderId','cnpTxnId'
+* Change: [cnpAPI v12.37] New complex element 'BNPLCaptureResponse' is added with existing simple element 'cnpTxnId','response','
+  responseTime','message','location'
+* Change: [cnpAPI v12.37] New complex element 'BNPLRefundRequest' is added with existing simple element 'amount','orderId','cnpTxnId'
+* Change: [cnpAPI v12.37] New complex element 'BNPLRefundResponse' is added with existing simple element 'cnpTxnId','response','
+  responseTime','message','location'
+* Change: [cnpAPI v12.37] New complex element 'BNPLCancelRequest' is added with existing simple element 'amount','orderId','cnpTxnId'
+* Change: [cnpAPI v12.37] New complex element 'BNPLCancelResponse' is added with existing simple element 'cnpTxnId','response','
+  responseTime','message','location'
+* Change: [cnpAPI v12.37] New complex element 'BNPLInquiryRequest' is added with existing simple element 'orderId','cnpTxnId'
+* Change: [cnpAPI v12.37] New complex element 'BNPLInquiryResponse' is added with existing simple element 'cnpTxnId','response','
+  responseTime','message','location' and complex element 'inquiryResult' of 'inquiryResultType'
+* Change: [cnpAPI v12.36] new Enum is added 'accountFundingTransactionTypeEnum' with new values 'accountToAccount','agentCashOut','
+  bankInitiated','businessDisbursement','businessToBusinessTransfer','debitPrepaidAccount','fundsDisbursement','fundTransfer','
+  governmentNonProfitDisbursement','paymentOfOwnCreditCardBill','payrollDisbursement','personToPerson','personToPersonCardAccount','
+  rapidMerchantSettlement','topUp','walletTransfer'
+* Change: [cnpAPI v12.36] new Enum is added 'accountFundingTransactionAccountNumberTypeEnum' with new values 'other','RTNAndBAN','IBAN','
+  cardAccount','email','phoneNumber','BANAndBIC','walletID','socialNetworkID'
+* Change: [cnpAPI v12.36] New complex 'finicityAccountRequest' element is added with simple element 'echeckCustomerId' of type '
+  string25Type'
+* Change: [cnpAPI v12.36] New complex 'finicityAccountResponse' element is added with simple elements 'cnpTxnId','response','responseTime','
+  message','location' and new complex element 'finicityAccount' of type 'finicityAccountInfoType'
+* Change: [cnpAPI v12.36] To support 'finicityAccount' new complex type 'finicityAccountInfoType' is added with simple element accountId'
+  of 'string','accType' of type 'echeckAccountTypeEnum','realAccNum' of 'echeckAccountNumberType','routingNum' of 'routingNumberType'
+* Change: [cnpAPI v12.36] new element 'fraudCheckAction' of 'fraudCheckActionEnum' is added in Authorization, sale request.
+* Change: [cnpAPI v12.36] New values added 'APPROVED_SKIP_FRAUD_CHECK','DECLINED_NEED_FRAUD_CHECK' to existing 'fraudCheckActionEnum'
+* Change: [cnpAPI v12.36] New simple element 'accountId' of type 'string' is added in 'echeckType' existing complex type.
+* Change: [cnpAPI v12.36] new simple elements are added in existing complex element
+  accountFundingTransactionData,'receiverAccountNumberType' of 'accountFundingTransactionAccountNumberTypeEnum' and '
+  accountFundingTransactionType' of 'accountFundingTransactionTypeEnum'
+* Change: [cnpAPI v12.35] In existing Enum businessIndicatorEnum new values 'personToPersonCardAccount','debitPrepaidAccount','
+  paymentOfOwnCreditCardBill','businessDisbursement','businessToBusinessTransfer','governmentNonProfitDisbursement','
+  rapidMerchantSettlement','agentCashOut' are added.
+* Change: [cnpAPI v12.35] New Enum 'stateTypeEnum' is added with values 'AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','
+  IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','
+  SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','AB','BC','MB','NB','NL','NT','NS','ON','PE','QC','SK','YT','NU'
+* Change: [cnpAPI v12.35] In existing Enum fulfilmentMethodTypeEnum new values 'STANDARD_SHIPPING' and 'EXPEDITED_SHIPPING'
+* Change: [cnpAPI v12.35] In existing Enum orderChannelEnum new values 'SCAN_AND_GO' and 'SMART_TV'
+* Change: [cnpAPI v12.35] New complex element 'accountFundingTransactionData' added with below simple elements receiverFirstName of '
+  string35Type' ,'receiverLastName' of 'string35Type','receiverState' of 'stateTypeEnum',''receiverCountry' of 'countryTypeEnum' and '
+  receiverAccountNumber' of 'string50Type'
+* Change: [cnpAPI v12.35] 'accountFundingTransactionData' is added in Authorization,sale,credit,capturegiventAuth and FORCECapture request.
+
+## Version 12.34.2 (v12.34.2)(June 21, 2024)
+
+* Change: [cnpAPI v12.34.2] cnp-sdk-for-java is upgraded to work with Java 8 compatibility.
+
+## Version 12.34.1 (v12.34.1)(May 06, 2024)
+
+* Change: cnp-sdk-for-java is upgraded to work with Java 17.
+
+## Version 12.34.0 (v12.34)(February 15, 2024)
+
+* Change: [cnpAPI v12.34] For existing simple element 'amount' simple type is changed from 'transactionAmountType' to '
+  achTransactionAmountType' in transactions-
+  vendorCredit,vendorDebit,submerchantCredit,submerchantDebit,payFacDebit,payFacCredit,reserveCredit,reserveDebit
+* Change: [cnpAPI v12.34] Added new simple type 'achTransactionAmountType' to support 'amount'.
+* Change: [cnpAPI v12.34] Added 'accountToAccount','bankInitiated','fundsDisbursement','payrollDisbursement','personToPerson','topUp' in
+  existing enum businessIndicatorEnum.
+* Change: [cnpAPI v12.34] For existing element 'origId' from 'queryTransaction' simpletype changed from 'string25Type' to '
+  stringMin1Max36CollapseWhiteSpaceType'.
+* Change: [cnpAPI v12.34] New request element 'finicityUrlRequest' is added with subfeilds-'firstName','lastName','phoneNumber','email'.
+* Change: [cnpAPI v12.34] New response element 'finicityUrlResponse' is added with subfeilds-'cnpTxnId','response','responseTime','message'
+  ,'location','echeckCustomerId','url'.
+* Change: [cnpAPI v12.34] New simple element 'echeckCustomerId' is added existing complex type 'echeckType'.
+
+## Version 12.33.0 (v12.32 & v12.33)(December 07, 2023)
+
+* Change: [cnpAPI v12.32] simple types of customerIpAddress is changed from ipAddress to stringipAddress
+* Change: [cnpAPI v12.32] to support customerIpAddress new simple type stringipAddress is added
+* Change: [cnpAPI v12.33] Added new simple types are added stringipAddress,numberOfPeriods,string10Type
+* Change: [cnpAPI v12.33] Added new Element shipmentId and subscription
+* Change: [cnpAPI v12.33] Added new complex element subscription added with few simple elements subscriptionId ,nextDeliveryDate ,periodUnit
+  ,numberOfPeriods ,regularItemPrice ,currentPeriod
+* Change: [cnpAPI v12.33] Added new Enum periodUnit of type enum with values WEEK,MONTH,QUARTER,YEAR
+
+## Version 12.31.0 (September 11, 2023)
+
+* Change: [cnpAPI v12.31] Added new Enum foreignRetailerIndicatorEnum with value F
+* Change: [cnpAPI v12.31] Added new Element-foreignRetailerIndicator in sale,capture,forceCapture,captureGivenAuth request.
+* Change: Upgraded HttpClient 4.5.2 to HttpClient5 5.2.1
+* Change: Upgraded Bouncy Castle bcpg-jdk15on 1.68 to bcpg-jdk18on 1.75
+* Change: Upgraded Bouncy Castle bcprov-ext-jdk15on 1.68 to bcprov-ext-jdk15to18 1.75
+* Change: Upgraded commons-io 2.8.0 to commons-io 2.11.0
+* Change: Changed default property value for response & connect 'timeout' from 6000ms to 120000ms
+* Change: httpKeepAlive property support is removed. For http connections, it will always be true i.e., SDK will be reusing the connection.
+
+## Version 12.30.0 (March 03, 2023)
+
+* Change: [cnpAPI v12.30] Added new Element authIndicator for authorization
+* Change: [cnpAPI v12.30] Added new values - Estimated and Incremental in authIndicatorEnum
+* Change: [cnpAPI v12.30] Added new Element amount for authorization
+
+## Version 12.29.0 (January 24, 2023)
+
+* Change: [cnpAPI v12.28] Added new value - MIT in orderChannelEnum
+* Change: [cnpAPI v12.29] Added new Element sellerInfo for authorization and sale
+* Change: [cnpAPI v12.29] Added new Element sellerAddress in SellerInfo
+* Change: [cnpAPI v12.29] Added new Element sellerTagsType in SellerInfo
+* Change: [cnpAPI v12.29] Changed datatype for networkToken(ccAccountNumberType) for existing Authmax's Elements in Response
+* Change: [cnpAPI v12.29] Changed datatype for authMaxResponseCode(responseType) for existing Authmax's Elements in Response
+* Change: [cnpAPI v12.29] Changed datatype for authMaxResponseMessage(messageType) for existing Authmax's Elements in Response
+
+## Version 12.27.0 (September 30, 2022)
+
+* Change:  [cnpAPI v12.27] Added new Element AuthMax in Authorization/ Sale Response
+* Change:  [cnpAPI v12.27] Added new elements authMaxApplied, networkTokenApplied, networkToken, authMaxResponseCode, authMaxResponseMessage
+  in new element AuthMax
+* Change:  [cnpAPI v12.27] Added new values FIFA, FIVC, FISC, FISD, FIPC, FIPD, FIRC, FIRD in existing actionTypeEnum Enum
+* Change:  [cnpAPI v12.26] Added new Element passengerTransportData for
+  authorization/sale/capture/forceCapture/captureGivenAuth/credit/depositTransactionReversal/refundTransactionReversal
+* Change:  [cnpAPI v12.26] Added new elements passengerName, ticketNumber, issuingCarrier, carrierName, restrictedTicketIndicator,
+  numberOfAdults, numberOfChildren, customerCode, arrivalDate, issueDate, travelAgencyCode, travelAgencyName, computerizedReservationSystem,creditReasonIndicator, ticketChangeIndicator, ticketIssuerAddress, exchangeTicketNumber, exchangeAmount, exchangeFeeAmount, tripLegDataare added for new element passengerTransportData.
+* Change:  [cnpAPI v12.26] Added new elements tripLegNumber, departureCode, carrierCode, serviceClass, stopOverCode, destinationCode,
+  fareBasisCode, departureDate, originCity, travelNumber, departureTime, arrivalTime added in new element in tripLegData.
+* Change:  [cnpAPI v12.26] Added existing Elements additionalCOFData in authReversal/credit
+
+## Version 12.25.0 (May 17, 2022)
+
+* Change:  Added new Elements to support Guaranteed Payments for Authorization/Sale-overridePolicy, fsErrorCode, merchantAccountStatus,
+  productEnrolled, decisionPurpose, fraudSwitchIndicator.
+* Change:  Added a new Enum productEnrolledEnum(GUARPAY1,GUARPAY2,GUARPAY3) to support productEnrolled
+* Change:  Added a new Enum decisionPurposeEnum(CONSIDER_DECISION,INFORMATION_ONLY) to support decisionPurpose
+* Change:  Added a new Enum fraudSwitchIndicatorEnum(PRE,POST) to support fraudSwitchIndicator
+* Change:  Added new Elements to support Cruise Lines for lodgingInfo element for Authorization/Sale :- bookingID, passengerName,
+  propertyAddress( name,city,region, country), travelPackageIndicator, smokingPreference, numberOfRooms, tollFreePhoneNumber.
+* Change:  Added a new Enum travelPackageIndicatorEnum(CarRentalReservation,AirlineReservation,Both,Unknown) to support
+  travelPackageIndicator
+
+## Version 12.24.0 (April 04, 2022)
+
+* Change: [cnpAPI v12.23] Added a new value in businessIndicatorEnum to support businessIndicator element :buyOnlinePickUpInStore.
+* Change: [cnpAPI v12.23] Added new element :orderChannel for Auth/sale transaction request.
+* Change: [cnpAPI v12.23] Added new elements(accountUsername, userAccountNumber, userAccountEmail, membershipId, membershipPhone,
+  membershipEmail, membershipName, accountCreatedDate and userAccountPhone) in customerInfo type.
+* Change: [cnpAPI v12.23] Added new elements:sellerId , url to support contact type which is referenced by retailerAddress
+* Change: [cnpAPI v12.23] Added new elements retailerAddress,additionalCOFData to support Auth/Sale/CaptureGivenAuth.
+* Change: [cnpAPI v12.23] Added a new elements:discountCode,discountPercent,fulfilmentMethodType in enhancedData.
+* Change: [cnpAPI v12.23] Added a new elements:itemCategory,itemSubCategory,productId,productName in LineItemData
+* Change: [cnpAPI v12.24] Added a new values in businessIndicatorEnum to support businessIndicator element :
+  highRiskSecuritiesPurchase,fundTransfer,walletTransfer
+* Change: [cnpAPI v12.24] Added OrderChannelEnum to support element :orderChannel for Auth/sale transaction request.
+* Change: [cnpAPI v12.24] Added fulfilmentMethodTypeEnum to support element fulfilmentMethodType in enhancedData type
+* Change: [cnpAPI v12.24] Added new value in frequencyOfMITEnum: Annually(It was Anually- Incorrect spelling in earlier version.)
+* Change: [cnpAPI v12.24] Added new element crypto to support Auth/Sale/CaptureGivenAuth.
+* Change: [cnpAPI v12.24] Added new element fraudCheckStatus to support Auth/Sale.
+
+## Version 12.22.0 (March 28, 2022)
+
+* Change: New element introduced for different request.
+* Change: new element :address is added in vendorCredit/vendorDebit/FastAccessFunding.
+
+## Version 12.21.2 (March 17, 2022)
+
+* Change: Added functionality to handle status query transaction for multi sites
+* Change: Version ID updated to '12.21.2'
+
+## Version 12.21.1 (March 16, 2022)
+
+* Change: Added functionality to handle status query transaction for multi sites
+* Change: Version ID updated to '12.21.1'
+
+## Version 12.21.0 (January 20, 2022)
+
+* Change: Increased authenticationValueType length from 56 to 512
+* Change: Version ID updated to '12.21.0'
+
+## Version 12.20.0 (December 07, 2021)
+
+* Change: Added support for Interac transactions
+* Change: Version ID updated to '12.20.0'
+
+## Version 12.19.2 (September 29, 2021)
+
+* Change: Updated com.jcraft:jsch version from '0.1.54' to '0.1.55'
+* Change: Updated commons-io version from '2.5' to '2.8.0'
+* Change: Updated org.bouncycastle:bcpg-jdk15on version from '1.59' to '1.68'
+* Change: Updated org.bouncycastle:bcprov-ext-jdk15on version from '1.59' to '1.68'
+* Change: Updated junit version from '4.12' to '4.13.2'
+
+## Version 12.19.1 (August 31, 2021)
+
+* Change: Group ID Change from 'com.cnp' to 'io.github.vantiv' & package refactoring
+* Change: Version ID updated to '12.19.1'
+* Change: Added New task for .pom file generation in build.gradle
+* Change: Updated existing task for JavaDocs with type:JAR
+
+## Version 12.19.0 (February 04, 2021)
+
+* Feature: Added a new transaction type: Deposit Transaction Reversal
+* Feature: Added a new transaction type: Refund Transaction Reversal
+* Feature: Added an optional element OrderID in Capture Transaction
+* Feature: Added an optional element OrderID in Credit Transaction
+
+## Version 12.17.1 (November 25, 2020)
+
+* Change: Rewrote part of ResponseFileParser to reduce the potential for future bugs
+
+## Version 12.17.0 (October 23, 2020)
+
+* Feature: Added a new optional element: Business Indicator
+
+## Version 12.16.0 (October 07, 2020)
+
+* Feature: Added a new transaction type: Transaction Reversal
+* BugFix: Properly call methods in CnpResponseProcessor
+* Change: Rename CnpResponseProcessor.processAcountUpdate to CnpResponseProcessor.processAccountUpdateResponse
+
+## Version 12.15.0 (September 28, 2020)
+
+* Feature: Added an AuthenticationShopperID to cardTokenType
+* Feature: Added a copayAmount to healthcareAmounts
+* Feature: Created echeckTokenRoutingNumber and echeckTokenAccountTypeEnum types and set routingNum and accType
+* in echeckTokenType to those new types
+* Feature: Added debitResponse and debitMessage fields to pinlessDebitResponse
+
+## Version 12.14.0 (July 09, 2020)
+
+* Feature: Added pinlessDebitResponse in authorizationResponse, authReversalResponse, captureResponse, saleResponse
+* Feature: Added tokenAuthenticationValue as an optional child of the cardholderAuthentication element
+
+## Version 12.13.0 (May 29, 2020)
+
+* Feature: Added location as optional element of all online responses
+
+## Version 12.11.3 (April 28, 2020)
+
+* BugFix: Fix serialization issue in BatchRequest
+
+## Version 12.11.2 (March 23, 2020)
+
+* BugFix: Add neutering for cardValidationNum
+
+## Version 12.11.1 (February 11, 2020)
+
+* BugFix: Neutering of XMLRequest for log was affecting actual log, separated these two XMLs.
+
+## Version 12.11.0 (January 14, 2020)
+
+* Feature: Added merchantCatagoryCode support to forceCapture, captureGivenAuth, sale, credit, authorization
+* Feature: Added authenticationProtocolVersion support to fraudCheckType
+
+## Version 12.10.0 (October 22, 2019)
+
+* Feature: Added skipRealtimeAU support to authorization and sale
+* Feature: Added support for accountUpdateSource and numAccountUpdates in responses
+
+## Version 12.9.0 (October 22, 2019)
+
+* Feature: Added support for customerCredit, customerDebit
+* Feature: Added support for payoutOrgCredit, payoutOrgDebit
+* Feature: Added fundingCustomerID support
+* Feature: Enhancements to fastAccessFunding
+
+## Version 12.8.0 (August 28, 2019)
+
+* Feature: Added tokenUrl element
+
+## Version 12.7.1(April 09, 2019)
+
+* BugFix: Removing unit tests for giropay, ideal and sofort as they are not supported anymore
+* BugFix: Setup process no longer throws class cast exception
+
+## Version 12.7.0 (January 04, 2019)
+
+* Feature: XML 12.7 Support along with Hot-Hot config can be
+  found [here](https://gist.github.com/VantivSDK/58565a089c0623ad94aa1cb10801630c#gistcomment-2805345)
+
+## Version 12.5.0 (October 04, 2018)
+
+* Feature: Full functions for XML v12.5
+
+## Version 12.3.2 (June 20, 2018)
+
+* Feature: Added option for specifying sftp port in config
+
+## Version 12.3.1 (June 08, 2018)
+
+* Feature: Using BouncyCastle for PGP
+
+## Version 12.3.0 (May 14, 2018)
+
+* Feature: Added support for lodging information in authorization, sale, capture, captureGivenAuth, forceCapture and credit
+* Feature: Added translateToLowValueToken transaction type
+* Feature: Replaced routingPreference with pinlessDebitRequest in sale
+* Feature: Added support for showStatusOnly in queryTransaction
+* Feature: Added eventType, accountLogin and accountPasshash to fraudCheck
+
+## Version 12.1.1 (April 24, 2018)
+
+* BugFix: Set content-type to text/xml; charset=UTF-8
+
+## Version 12.1.0 (March 26, 2018)
+
+* Feature: Added support for Visa card on file transactions
+* Feature: Added fastAccessFunding transaction
+
+## Version 12.0.2
+
+* Feature: Give TLSv1.2 priority
+
+## Version 12.0.2
+
+* Feature: Give TLSv1.2 priority
+
+## Version 12.0.1
+
+* BugFix: Remove additional logging of response xml that was not controlled by printxml flag
+
+## Version 12.0.0 (December 07, 2017)
+
+* Feature: implement XML v12
+* Feature: remove option of using TLSv1.0
+
++----------------------------------------------------------------------------------------------------------------------+
+|The version history below is preserved from the Litle branded SDK. All features and bug fixes apply to the ||Vantiv CNP (>= SDK/XML v12) version of the SDK as well, hence the reason for preserving history. |
++----------------------------------------------------------------------------------------------------------------------+
+## Version 11.0.2 (July 31, 2017)
+
+* BugFix: fix how a Communication instance is created
+* Feature: update URLs to be current, not including Sandbox
+
+## Version 11.0.1 (April 20, 2017)
+
+* Feature: update commons-io and http-client versions
+* Feature: disable auto retry in HTTP client connection
+* Feature: add specific events for Open access error responses
+
+## Version 11.0 (April 12, 2017)
+
+* Feature: implement Vantiv eCommerce XMLv11.0
+* Feature: SEPA Support
+* Feature: iDEAL support
+* Feature: new giftCard transactions
+* Feature: giroPay support
+* Feature: Network Enhancements mandates
+* Feature: add support for raw network response
+* Bug fix: specify char encoding in HTTP header
+
+## Version 10.1.1 (June 07, 2016)
+
+Add method to close file resources
+
+## Version 9.3.2
+
+HTTP timeout set to 500ms
+
+## Version 9.3.1 (March 09, 2015)
+
+*Feature: PFIF instruction transaction was added
+
+## Version 9.3.0 (February 13, 2015)
+
+*Feature: Applepay support was added
+*Feature: Secondary amount support was added
+*Feature: Wallet support was added
+*Feature: EcheckPreNoteSale batch transaction type support was added
+*Feature: EcheckPreNoteCredit batch transaction type support was added
+
+## Version 9.0.0 (August 26, 2014)
+
+*Support version 9
+*modify xsd
+
+## Version 8.27.0 (August 26, 2014)
+
+* Add samples in the build
+* modify xsd
+
+## Version 8.25.4 (June 06, 2014)
+
+* Feature: Migrate build to Gradle
+
+## Version 8.25.3 (May 01, 2014)
+
+* Bug: Using the CnpResponseProcessor to check for responses would never work with EcheckSales.
+* Feature: Make it possible to load properties file from classpath
+
+## Version 8.25.2 (April 03, 2014)
+
+* Feature: Add support to multi step SFTP batching. Now this process can be done in up to three steps: generate batch file, send file and
+  retrieve file.
+* Feature: Improved performance when creating multiple instances of CnpOnline.
+
+## Version 8.25.1 (March 21, 2014)
+
+* Bugfix: delete the reports directory on clean in build.xml
+
+## Version 8.25.0 (March 06, 2014)
+
+* Feature: Added support for ROAM: Authorization, ForceCapture, CaptureGivenAuth, Sale, Credit
+
+## Version 8.24.0 (February 05, 2014)
+
+* Feature: Added new element triggered rule in supoort of advancedFraudResultsType
+
+## Version 8.23.1 (December 19, 2013)
+
+* Bugfix: Made the sdk and xml versions global constants
+
+## Version 8.23.0 (December 18, 2013)
+
+* Feature: Advanced Fraud Tool Support
+* Feature: Added new elements in support of CAT transactions.
+
+## Version 8.22.1 (December 18, 2013)
+
+* Bugfix: Corrected sdk version in batch & xml version in online and batch
+* Bugfix: Changed the hardcoded xsd files to be generated correctly when built
+
+## Version 8.22.0 (October 22, 2013)
+
+* Feature: Support for the following new gift card transactions: ActivateReversal, DeactivateReversal, LoadReversal, RefundReversal,
+  UnloadReversal, DepositReversal
+* Feature: UpdateSubscription now can take token or paypage updates, and can return token in the response
+* Feature: Support for virtualGiftCard in giftCard activations and can be returned in EnhancedAuthResponses
+* Feature: Gift Card responses can be returned from AuthReversal
+
+## Version 8.21.0 (September 20, 2013)
+
+* Feature: Support for the following new recurring transactions: CreatePlan, UpdatePlan
+* Feature: Support for the following new gift card transactions: Activate, Deactivate, Load, Unload, Balance Inquiry
+* Feature: Gift card responses are now returned as part of authorzationResponse, authReversalResponse, captureResponse, forceCapture,
+  captureGivenAuthResponse, saleResponse, creditResponse
+* Feature: fraudResult is now returned as part of captureResponse, forceCaptureResponse, captureGivenAuthResponse, creditResponse
+
+## Version 8.20.0 (August 07, 2013)
+
+* Backwards-Incompatible Feature: More initial support for Recurring, including the ability to update or cancel subscriptions.
+  CnpBatchResponse::getNextResponse now returns CnpTransactionInterface instead of TransactionType. This is to support the new recurringtransaction types which also implement TransactionType. Most existing uses of TransactionType can just cast from CnpTransactionInterfacewithout any other changes. The CnpResponseParser interface also includes 3 additional processor methods to handle the 3 transaction types.
+* Feature: Addition of an adapter to the CnpResponseProcessor so that clients don't need to implement all of the methods if most are not
+  used.
+
+## Version 8.19.0 (July 29, 2013)
+
+* Feature: Added deptRepayment as a choice for authorizations, forceCapture, captureGivenAuth, sale
+* Feature: More initial support for Recurring, including a backwards incompatible changing a field from numberOfPaymentsRemaining to
+  numberOfPayments
+
+## Version 8.18.0 (June 14, 2013)
+
+* Feature: Batch support - see https://gist.github.com/cnpSDK/5768846 and https://gist.github.com/cnpSDK/5768893
+* Feature: Add support for Recurring
+
+## Version 8.17.0 (March 29, 2013)
+
+* Feature: Add support for surcharging credit card transactions
+* Feature: Add support for specifying the terminalId on a pos transaction
+* Feature: Add support for pos transactions on tied refunds
+
+## Version 8.16.3 (March 01, 2013)
+
+* Bugfix: Add Connection:close header to further avoid concurrent connection limit
+
+## Version 8.16.2 (February 20, 2013)
+
+* Bugfix: Kit target was not copying the httpclient jars into the directory where they would be zipped up.
+
+## Version 8.16.1 (February 19, 2013)
+
+* Bugfix: Avoid concurrent connection limit by shutting down the HttpClient connection manager between requests
+
+## Version 8.16.0 (February 01, 2013)
+
+* Feature: Add recyling to voidResponse
+
+## Version 8.15.0 (January 31, 2013)
+
+* Feature: Add merchantData to echeck verifications and echeck redeposits
+
+## Version 8.14.0 (October 23, 2012)
+
+* Feature: Temporary storage of card validation num on tokens
+* Feature: Updating card validation numbers on tokens
+* Bugfix: Merged pull request #3 from aingram to speed up performance and avoid concurrent connection limit
+* Cleanup: Removed dependency for CXF, based on suggestion from viniciusccarvalho at https://github.com/CnpCo/cnp-sdk-for-java/issues/4
+* Cleanup: Updated httpclient dependency to version 4.0.1
+
+## Version 8.13.2 (June 18, 2012)
+
+* Bugfix: Customer Info Date of Birth was being printed with a time, which violates our specification of YYYY-MM-DD
+
+## Version 8.13.1 (May 22, 2012)
+
+* Feature: Echeck Void now supported
+
+## Version 8.13.0 (May 18, 2012)
+
+* Feature: Authorizations and Sales can accept an optional fraudFilterOverride parameter
+
+## Version 8.12.0 (April 16, 2012)
+
+* Feature: Add support for actionReason on credit
+* Feature: Track SDK Usage
+
+## Version 8.10.2 (April 11, 2012)
+
+* Feature: Adding support for partial overriding of settings username, password, merchantId on a per transaction basis
+
+## Version 8.10.1 (April 09, 2012)
+
+* Bugfix: Config file location on Windows
+
+## Version 8.10.0 (March 23, 2012)
+
+* Initial release
