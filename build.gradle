@@ -9,7 +9,8 @@ version = JAR_VERSION
 
 repositories {
     maven  {
-        url "http://repo1.maven.org/maven2"
+        //url "http://repo1.maven.org/maven2"
+ url "http://nufl2vpnexus02.nonprod.nb01.local:8081/repository/central/"
         allowInsecureProtocol = true
     }
 }
@@ -311,10 +312,10 @@ model {
 }
 
 task sourceJar(type:Jar) {
-    build.dependsOn it
-    dependsOn generateJaxbClasses
-    getDestinationDirectory().set(file("${buildDir}/kit"))
-    getArchiveClassifier().set('sources')
-    from "src/main/java"
-    from generateJaxbClasses.generatedDir
+    doLast {
+        getDestinationDirectory().set(file("${buildDir}/kit"))
+        getArchiveClassifier().set('sources')
+        from "src/main/java"
+        from generateJaxbClasses.generatedDir
+    }
 }
