@@ -9,8 +9,7 @@ version = JAR_VERSION
 
 repositories {
     maven  {
-        //url "http://repo1.maven.org/maven2"
- url "http://nufl2vpnexus02.nonprod.nb01.local:8081/repository/central/"
+        url "http://repo1.maven.org/maven2"
         allowInsecureProtocol = true
     }
 }

@@ -139,6 +139,7 @@ public class TestQueryTransaction {
         assertEquals("Original transaction found but response not yet available", queryTransactionResponse.getMessage());
         assertEquals("sandbox", queryTransactionResponse.getLocation());
     }
+
     @Test
     public void transactionFoundInSecondarySiteAndPrimarySiteUnavailable() throws Exception {
         QueryTransaction queryTransaction = new QueryTransaction();
@@ -157,6 +158,7 @@ public class TestQueryTransaction {
         assertEquals(1, queryTransactionResponse.getResultsMax10().getTransactionResponses().size());
         assertEquals("sandbox", queryTransactionResponse.getLocation());
     }
+
     @Test
     public void queryTransaction_notFoundinBothSites() throws Exception {
         queryTransaction = new QueryTransaction();
@@ -166,7 +168,7 @@ public class TestQueryTransaction {
         queryTransaction.setOrigActionType(ActionTypeEnum.R);
         queryTransaction.setReportGroup("default");
         CommManager.reset();
-        TransactionTypeWithReportGroup response = new CnpOnline(getCnpProperty("https://www.testvantivcnp.com/sandbox/communicator/online", "https://www.testvantivcnp.com/sandbox/communicator/online")).queryTransaction(queryTransaction);
+        TransactionTypeWithReportGroup response = new CnpOnline(getCnpProperty("https://www.testvantivcnp.com/spring/communicator/online", "https://www.testvantivcnp.com/spring/communicator/online")).queryTransaction(queryTransaction);
         QueryTransactionResponse queryTransactionResponse = (QueryTransactionResponse) response;
         assertEquals("Original transaction not found", queryTransactionResponse.getMessage());
         assertEquals("151", queryTransactionResponse.getResponse());
@@ -185,7 +187,7 @@ public class TestQueryTransaction {
         cnpProperty.setProperty("multiSiteUrl2", url2);
         cnpProperty.setProperty("oltpEncryptionPayload", "true");
         cnpProperty.setProperty("oltpEncryptionKeySequence", "10000");
-        cnpProperty.setProperty("oltpEncryptionKeyPath", "/home/buildvwr/pgpKeyOltp/cnpOltpEncryptionKey.asc");
+        cnpProperty.setProperty("oltpEncryptionKeyPath", System.getProperty("user.dir") + "/src/functionalTest/resources/testCnpOltpEncryptionKey.asc");
         return cnpProperty;
     }
 }

@@ -1121,7 +1121,7 @@ public class CnpOnline {
 			}
             //	System.out.println("config-------------"+config+"\n\n\n");
 
-            if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+            if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload", "false"))) {
                 xmlRequest = replaceWithEncryptedPayload(xmlRequest);
             }           
             
@@ -1171,7 +1171,7 @@ public class CnpOnline {
             }
             //	System.out.println("config-------------"+config+"\n\n\n");
 
-            if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+            if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload", "false"))) {
                 xmlRequest = replaceWithEncryptedPayload(xmlRequest);
             }
 
@@ -1315,7 +1315,7 @@ public class CnpOnline {
     }
 
     private String processTxnToBeEncrypted(String request) {
-        String publicKeyPath=config.getProperty("oltpEncryptionKeyPath");
+        String publicKeyPath=config.getProperty("oltpEncryptionKeyPath", null);
         if (publicKeyPath == null) {
             throw new CnpOnlineException("\"Problem in reading the Encryption Key path. Provide the Encryption key path.\"");
         }
