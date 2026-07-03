@@ -68,12 +68,20 @@ dependencies{
 ////////// PLUGIN CONFIGURATION ////////// 
 //sourceCompatibility=1.7
 
+// Redirect annotation processor and header output away from $buildDir/generated to avoid
+// overlap with XJC-generated sources used by sourceJar and javadoc tasks.
+tasks.withType(JavaCompile).configureEach {
+    options.generatedSourceOutputDirectory.set(layout.buildDirectory.dir("ap-sources/${name}"))
+    options.headerOutputDirectory.set(layout.buildDirectory.dir("ap-headers/${name}"))
+}
+
 clean {
     // temporary, we need to change the tests to generate output inside build folder
     delete 'test'
 }
 
 jacocoTestReport {
+    dependsOn 'testCertification'
     executionData(fileTree(dir:"${buildDir}/jacoco/", include:"*.exec"))
 }
 
@@ -311,10 +319,10 @@ model {
 }
 
 task sourceJar(type:Jar) {
-    doLast {
-        getDestinationDirectory().set(file("${buildDir}/kit"))
-        getArchiveClassifier().set('sources')
-        from "src/main/java"
-        from generateJaxbClasses.generatedDir
-    }
+    build.dependsOn it
+    dependsOn generateJaxbClasses
+    getDestinationDirectory().set(file("${buildDir}/kit"))
+    getArchiveClassifier().set('sources')
+    from "src/main/java"
+    from generateJaxbClasses.generatedDir
 }

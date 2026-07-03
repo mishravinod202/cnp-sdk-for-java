@@ -1,42 +1,32 @@
-apply plugin : 'java'
-apply plugin : 'eclipse'
+apply plugin: 'java'
+apply plugin: 'eclipse'
 repositories {
-    maven  {
+    maven {
         url "http://repo1.maven.org/maven2"
         allowInsecureProtocol = true
     }
 }
-   dependencies{
-       implementation rootProject
- }
-  task execEcheckCreditExample(type:JavaExec){
-	check.dependsOn it
-        main='io.github.vantiv.sdk.samples.EcheckCreditExample'
-        classpath = sourceSets.main.runtimeClasspath	   
+dependencies {
+    implementation rootProject
 }
-  task execEcheckRedepositExample(type:JavaExec){
-	check.dependsOn it
-        main='io.github.vantiv.sdk.samples.EcheckRedepositExample'
-        classpath = sourceSets.main.runtimeClasspath	   
+task execEcheckCreditExample(type: JavaExec) {
+    check.dependsOn it
+    main = 'io.github.vantiv.sdk.samples.EcheckCreditExample'
+    classpath = sourceSets.main.runtimeClasspath
 }
-  task execEcheckSaleExample(type:JavaExec){
-	check.dependsOn it
-        main='io.github.vantiv.sdk.samples.EcheckSaleExample'
-        classpath = sourceSets.main.runtimeClasspath	   
+task execEcheckRedepositExample(type: JavaExec) {
+    check.dependsOn it
+    main = 'io.github.vantiv.sdk.samples.EcheckRedepositExample'
+    classpath = sourceSets.main.runtimeClasspath
 }
-
-  task execEcheckVerificationExample(type:JavaExec){
-	check.dependsOn it
-        main='io.github.vantiv.sdk.samples.EcheckVerificationExample'
-        classpath = sourceSets.main.runtimeClasspath	   
+task execEcheckSaleExample(type: JavaExec) {
+    check.dependsOn it
+    main = 'io.github.vantiv.sdk.samples.EcheckSaleExample'
+    classpath = sourceSets.main.runtimeClasspath
 }
 
-
-
-   
-   
-  
-   
-   
-
-
+task execEcheckVerificationExample(type: JavaExec) {
+    check.dependsOn it
+    main = 'io.github.vantiv.sdk.samples.EcheckVerificationExample'
+    classpath = sourceSets.main.runtimeClasspath
+}

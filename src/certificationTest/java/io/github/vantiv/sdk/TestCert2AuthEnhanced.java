@@ -25,10 +25,14 @@ public class TestCert2AuthEnhanced {
 
 	private static CnpOnline cnp;
 
-	private String preliveStatus = System.getenv("preliveStatus");
+	private static String preliveStatus = System.getenv("preliveStatus");
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
+		if (preliveStatus == null) {
+			System.out.println("preliveStatus environment variable is not defined. Defaulting to down.");
+			preliveStatus = "down";
+		}
         Properties config = new Properties();
         FileInputStream fileInputStream = new FileInputStream((new Configuration()).location());
         config.load(fileInputStream);

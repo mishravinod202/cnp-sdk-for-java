@@ -17,7 +17,7 @@ public class MechaBatch {
 		Properties configFromFile = request.getConfig();
 		String merchantId = configFromFile.getProperty("merchantId");
 		
-		if(!preliveStatus.equalsIgnoreCase("down")) {
+		if(preliveStatus != null && !preliveStatus.equalsIgnoreCase("down")) {
 		
 			CnpBatchRequest batch = request.createBatch(merchantId);
 			 
