@@ -2736,6 +2736,51 @@ public class TestCnpOnline {
 
 
 	@Test
+	public void testQueryDpoWalletBalance() throws Exception {
+		QueryDpoWalletBalance queryDpoWalletBalance = new QueryDpoWalletBalance();
+		queryDpoWalletBalance.setId("dpoQuery1");
+		queryDpoWalletBalance.setReportGroup("Default Report Group");
+
+		Communication mockedCommunication = mock(Communication.class);
+		if ("true".equalsIgnoreCase(config.getProperty("oltpEncryptionPayload"))) {
+			when(mockedCommunication.requestToServer(matches("(?s).*?<cnpOnlineRequest.*?<encryptedPayload>(.*?)</encryptedPayload>.*?\n"), any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<queryDpoWalletBalanceResponse id='dpoQuery1' reportGroup='Default Report Group'>" +
+							"<cnpTxnId>999888777666</cnpTxnId>" +
+							"<response>000</response>" +
+							"<responseTime>2026-06-01T10:00:00</responseTime>" +
+							"<message>Approved</message>" +
+							"<projectedAvailableBalance>5000</projectedAvailableBalance>" +
+							"<reserveBalance>1000</reserveBalance>" +
+							"<availableRtpBalance>4000</availableRtpBalance>" +
+							"</queryDpoWalletBalanceResponse></cnpOnlineResponse>");
+		} else {
+			when(mockedCommunication.requestToServer(
+					matches("(?s).*?<cnpOnlineRequest.*?<queryDpoWalletBalance[^>]*id=\"dpoQuery1\".*?"),
+					any(Properties.class)))
+					.thenReturn("<cnpOnlineResponse version='12.50' response='0' message='Valid Format' xmlns='http://www.vantivcnp.com/schema'>" +
+							"<queryDpoWalletBalanceResponse id='dpoQuery1' reportGroup='Default Report Group'>" +
+							"<cnpTxnId>999888777666</cnpTxnId>" +
+							"<response>000</response>" +
+							"<responseTime>2026-06-01T10:00:00</responseTime>" +
+							"<message>Approved</message>" +
+							"<projectedAvailableBalance>5000</projectedAvailableBalance>" +
+							"<reserveBalance>1000</reserveBalance>" +
+							"<availableRtpBalance>4000</availableRtpBalance>" +
+							"</queryDpoWalletBalanceResponse></cnpOnlineResponse>");
+		}
+		cnp.setCommunication(mockedCommunication);
+		QueryDpoWalletBalanceResponse response = cnp.queryDpoWalletBalance(queryDpoWalletBalance);
+		assertEquals("dpoQuery1", response.getId());
+		assertEquals("000", response.getResponse());
+		assertEquals("Approved", response.getMessage());
+		assertEquals(Long.valueOf(5000L), response.getProjectedAvailableBalance());
+		assertEquals(Long.valueOf(1000L), response.getReserveBalance());
+		assertEquals(Long.valueOf(4000L), response.getAvailableRtpBalance());
+		assertEquals(999888777666L, response.getCnpTxnId());
+	}
+
+	@Test
 	public void testFraudCheck() throws Exception {
 		FraudCheck fraudCheck = new FraudCheck();
 		AdvancedFraudChecksType advancedFraudChecks = new AdvancedFraudChecksType();

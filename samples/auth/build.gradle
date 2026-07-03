@@ -1,47 +1,53 @@
-apply plugin : 'java'
-apply plugin : 'eclipse'
+apply plugin: 'java'
+apply plugin: 'eclipse'
 repositories {
-    maven  {
-       url = "http://repo1.maven.org/maven2"
+    maven {
+        url "http://repo1.maven.org/maven2"
+        allowInsecureProtocol = true
     }
 }
-   dependencies{
-       implementation rootProject
- }
-  task execAuthExample(type:JavaExec){
-	check.dependsOn it
-        mainClass = 'io.github.vantiv.sdk.samples.AuthExample'
-        classpath = sourceSets.main.runtimeClasspath	
 
-     
+dependencies {
+    implementation rootProject
 }
-  task execAuthReversalExample(type:JavaExec) {
-	check.dependsOn it
-        mainClass = 'io.github.vantiv.sdk.samples.AuthReversalExample'
-        classpath = sourceSets.main.runtimeClasspath
-}
-   task execAuthWithTokenExample(type:JavaExec) {
-	check.dependsOn it
-        mainClass = 'io.github.vantiv.sdk.samples.AuthWithTokenExample'
-        classpath = sourceSets.main.runtimeClasspath
 
+task execAuthExample(type: JavaExec) {
+    check.dependsOn it
+    mainClass = 'io.github.vantiv.sdk.samples.AuthExample'
+    classpath = sourceSets.main.runtimeClasspath
 }
-  task execFullLifeCycleExample(type:JavaExec) {
-	check.dependsOn it
-        mainClass = 'io.github.vantiv.sdk.samples.FullLifeCycleExample'
-        classpath = sourceSets.main.runtimeClasspath
+
+task execAuthReversalExample(type: JavaExec) {
+    check.dependsOn it
+    mainClass = 'io.github.vantiv.sdk.samples.AuthReversalExample'
+    classpath = sourceSets.main.runtimeClasspath
 }
- task execSampleDetailTax(type:JavaExec) {
-	check.dependsOn it
-        mainClass = 'io.github.vantiv.sdk.samples.SampleDetailTax'
-        classpath = sourceSets.main.runtimeClasspath
+
+task execAuthWithTokenExample(type: JavaExec) {
+    check.dependsOn it
+    mainClass = 'io.github.vantiv.sdk.samples.AuthWithTokenExample'
+    classpath = sourceSets.main.runtimeClasspath
 }
-task execAuthExampleInterac(type:JavaExec){
+
+task execFullLifeCycleExample(type: JavaExec) {
+    check.dependsOn it
+    mainClass = 'io.github.vantiv.sdk.samples.FullLifeCycleExample'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task execSampleDetailTax(type: JavaExec) {
+    check.dependsOn it
+    mainClass = 'io.github.vantiv.sdk.samples.SampleDetailTax'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task execAuthExampleInterac(type: JavaExec) {
     check.dependsOn it
     mainClass = 'io.github.vantiv.sdk.samples.AuthExampleInterac'
     classpath = sourceSets.main.runtimeClasspath
 }
-task execAuthExampleInterac1(type:JavaExec){
+
+task execAuthExampleInterac1(type: JavaExec) {
     check.dependsOn it
     mainClass = 'io.github.vantiv.sdk.samples.AuthExampleInterac1'
     classpath = sourceSets.main.runtimeClasspath

@@ -1,22 +1,18 @@
-apply plugin : 'java'
-apply plugin : 'eclipse'
+apply plugin: 'java'
+apply plugin: 'eclipse'
 repositories {
-    maven  {
-        url = "http://repo1.maven.org/maven2"
+    maven {
+        url "http://repo1.maven.org/maven2"
+        allowInsecureProtocol = true
     }
 }
-   dependencies{
-       implementation rootProject
- }
-  task execSaleExample(type:JavaExec){
-	check.dependsOn it
-        mainClass = 'io.github.vantiv.sdk.samples.SaleExample'
-        classpath = sourceSets.main.runtimeClasspath	
 
-     
+dependencies {
+    implementation rootProject
 }
-  
-   
-   
 
-
+task execSaleExample(type: JavaExec) {
+    check.dependsOn it
+    mainClass = 'io.github.vantiv.sdk.samples.SaleExample'
+    classpath = sourceSets.main.runtimeClasspath
+}

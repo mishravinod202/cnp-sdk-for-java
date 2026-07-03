@@ -1603,12 +1603,10 @@ public class TestBatchFile {
 
                     @Override
                     public void processDepositTransactionReversalResponse(DepositTransactionReversalResponse depositTransactionReversalResponse) {
-
                     }
 
                     @Override
                     public void processRefundTransactionReversalResponse(RefundTransactionReversalResponse refundTransactionReversalResponse) {
-
                     }
                 })) {
 
@@ -1934,12 +1932,10 @@ public class TestBatchFile {
 
                     @Override
                     public void processDepositTransactionReversalResponse(DepositTransactionReversalResponse depositTransactionReversalResponse) {
-
                     }
 
                     @Override
                     public void processRefundTransactionReversalResponse(RefundTransactionReversalResponse refundTransactionReversalResponse) {
-
                     }
                 })) {
             txns++;
@@ -2333,12 +2329,10 @@ public class TestBatchFile {
 
                     @Override
                     public void processDepositTransactionReversalResponse(DepositTransactionReversalResponse depositTransactionReversalResponse) {
-
                     }
 
                     @Override
                     public void processRefundTransactionReversalResponse(RefundTransactionReversalResponse refundTransactionReversalResponse) {
-
                     }
                 })) {
             txns++;
@@ -2687,12 +2681,10 @@ public class TestBatchFile {
 
         @Override
         public void processDepositTransactionReversalResponse(DepositTransactionReversalResponse depositTransactionReversalResponse) {
-
         }
 
         @Override
         public void processRefundTransactionReversalResponse(RefundTransactionReversalResponse refundTransactionReversalResponse) {
-
         }
     }
 

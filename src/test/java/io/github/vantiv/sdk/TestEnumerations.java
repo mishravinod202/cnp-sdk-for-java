@@ -94,6 +94,52 @@ public class TestEnumerations {
         EcheckSale info = new EcheckSale();
         info.setOrderSource(OrderSourceType.ECHECKPPD);
     }
+
+	@Test
+	public void orderSourceWithPaze() {
+		Sale info = new Sale();
+		info.setOrderSource(OrderSourceType.PAZE);
+	}
+
+	@Test
+	public void orderSourceWithSamsungpay() {
+		Sale info = new Sale();
+		info.setOrderSource(OrderSourceType.SAMSUNGPAY);
+	}
+
+	@Test
+	public void orderSourceWithAmazonpay() {
+		Sale info = new Sale();
+		info.setOrderSource(OrderSourceType.AMAZONPAY);
+	}
+
+	@Test
+	public void orderSourceWithGooglepay() {
+		Sale info = new Sale();
+		info.setOrderSource(OrderSourceType.GOOGLEPAY);
+	}
+
+	@Test
+	public void identityBundleFields() {
+		IdentityBundle identityBundle = new IdentityBundle();
+		identityBundle.setMerchantId("merchant001");
+		identityBundle.setEntityId("entity001");
+		identityBundle.setEntityReference("entityRef001");
+		identityBundle.setResourceId("resource001");
+		identityBundle.setResourceReference("resourceRef001");
+		identityBundle.setCommandId("cmd001");
+		identityBundle.setCommandReference("cmdRef001");
+		identityBundle.setOrderReference("orderRef001");
+		assertEquals("merchant001", identityBundle.getMerchantId());
+		assertEquals("entity001", identityBundle.getEntityId());
+		assertEquals("entityRef001", identityBundle.getEntityReference());
+		assertEquals("resource001", identityBundle.getResourceId());
+		assertEquals("resourceRef001", identityBundle.getResourceReference());
+		assertEquals("cmd001", identityBundle.getCommandId());
+		assertEquals("cmdRef001", identityBundle.getCommandReference());
+		assertEquals("orderRef001", identityBundle.getOrderReference());
+	}
+
 	@Test
 	public void methodOfPayment_VI() {
 		CardType info = new CardType();

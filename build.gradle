@@ -1,8 +1,8 @@
-apply plugin : 'eclipse'
-apply plugin : 'java'
-apply plugin : 'java-library'
-apply plugin : 'jacoco'
-apply plugin : 'maven-publish'
+apply plugin: 'eclipse'
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'jacoco'
+apply plugin: 'maven-publish'
 
 group = 'io.github.vantiv'
 version = JAR_VERSION
@@ -27,10 +27,10 @@ allprojects {
     }
 }
 
-
 repositories {
-    maven  {
-        url = "http://repo1.maven.org/maven2"
+    maven {
+        url "http://repo1.maven.org/maven2"
+        allowInsecureProtocol = true
     }
 }
 
@@ -43,8 +43,8 @@ configurations {
 }
 
 sourceSets {
-    main{
-        java{
+    main {
+        java {
             srcDirs += xjcGeneratedDir
         }
     }
@@ -62,7 +62,6 @@ sourceSets {
     }
 }
 
-
 configurations.named('functionalTestImplementation') {
     extendsFrom(configurations.testImplementation)
 }
@@ -79,28 +78,25 @@ configurations.named('certificationTestRuntimeOnly') {
     extendsFrom(configurations.functionalTestRuntimeOnly)
 }
 
-
 dependencies {
-
-    implementation "com.jcraft:jsch:0.1.55"
-    implementation "commons-io:commons-io:2.18.0"
-    implementation "org.apache.httpcomponents.client5:httpclient5:5.4.3"
-    implementation "org.bouncycastle:bcpg-jdk18on:1.84"
-    implementation "org.bouncycastle:bcprov-jdk18on:1.84"
+    implementation 'com.github.mwiede:jsch:2.28.3'
+    implementation 'commons-io:commons-io:2.22.0'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.6.2'
+    implementation 'org.bouncycastle:bcpg-jdk18on:1.84'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.84'
     implementation 'org.bouncycastle:bcutil-jdk18on:1.84'
-    implementation "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
-    implementation "org.glassfish.jaxb:jaxb-runtime:4.0.6"
-    implementation "org.slf4j:slf4j-simple:2.0.17"
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.5'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.9'
+    implementation 'org.slf4j:slf4j-simple:2.0.18'
 
-    testImplementation "org.slf4j:slf4j-nop:2.0.17"
-    testImplementation "junit:junit:4.13.2"
-    testImplementation "org.mockito:mockito-core:5.17.0"
+    testImplementation 'org.slf4j:slf4j-nop:2.0.17'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.17.0'
 
     // JAXB XJC code generator (Jakarta JAXB 4.x)
-    generateJAXB "org.glassfish.jaxb:jaxb-xjc:4.0.5"
-    generateJAXB "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
-    generateJAXB "org.glassfish.jaxb:jaxb-runtime:4.0.6"
-
+    generateJAXB 'org.glassfish.jaxb:jaxb-xjc:4.0.5'
+    generateJAXB 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.5'
+    generateJAXB 'org.glassfish.jaxb:jaxb-runtime:4.0.6'
 }
 
 ////////// PLUGIN CONFIGURATION //////////
@@ -110,9 +106,9 @@ clean {
     delete 'test'
 }
 
-jar{
+jar {
     manifest {
-        attributes("Implementation-Title":"Cnp SDK For Java 1.5 and greater", "Implementation-Version":"${JAR_VERSION}","Implementation-Vendor":"Cnp&Co","Main-Class":"io.github.vantiv.sdk.Setup")
+        attributes("Implementation-Title": "Cnp SDK For Java 1.5 and greater", "Implementation-Version": "${JAR_VERSION}", "Implementation-Vendor": "Cnp&Co", "Main-Class": "io.github.vantiv.sdk.Setup")
     }
     // Produce a self-contained distributable jar for file-based consumers.
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -125,7 +121,7 @@ jar{
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.jar")
 }
 
-task javadocJar(type:Jar){
+task javadocJar(type: Jar) {
     dependsOn javadoc
     getArchiveClassifier().set('javadoc')
     getDestinationDirectory().set(file("$buildDir/kit/java17/doc"))
@@ -140,79 +136,79 @@ test {
 }
 
 ////////// CUSTOM TASKS ///////////
-task processXsd (type: Copy) {
-    ext.xsdOutput = file("$buildDir/xsd") 
-    
-    from ('src/main/xsd') {
+task processXsd(type: Copy) {
+    ext.xsdOutput = file("$buildDir/xsd")
+
+    from('src/main/xsd') {
         include '*.xsd'
     }
-    
+
     into xsdOutput
-    
+
     doFirst {
         xsdOutput.mkdirs()
     }
-    
+
     doLast {
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(attributeFormDefault=\"unqualified\")>", replace:"\\1 xmlns:jaxb=\"https://jakarta.ee/xml/ns/jaxb\" jaxb:version=\"3.0\">", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(elementFormDefault=\"qualified\")>", replace:"\\1 xmlns:jaxb=\"https://jakarta.ee/xml/ns/jaxb\" jaxb:version=\"3.0\">", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"<xs:attribute name=\"id\" type=\"xp:string25Type\" use=\"required\"\\s*/>", replace:"       <xs:attribute name=\"id\" type=\"xp:string25Type\" use=\"required\" />", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"<xs:attribute name=\"id\" type=\"xp:stringMin1Max25CollapseWhiteSpaceType\" use=\"required\"\\s*/>", replace:"       <xs:attribute name=\"id\" type=\"xp:stringMin1Max25CollapseWhiteSpaceType\" use=\"required\" />", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"<xs:attribute name=\"customerId\" type=\"xp:customerIdType\" use=\"optional\"\\s*/>", replace:"       <xs:attribute name=\"customerId\" type=\"xp:customerIdType\" use=\"optional\"/>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match:"<xs:sequence>", replace:"        <xs:sequence>")
-        ant.replaceregexp(file:"$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match:"<xs:element name=\"cnpTxnId\" type=\"xp:cnpIdType\" />", replace:"         <xs:element name=\"cnpTxnId\" type=\"xp:cnpIdType\" />")
-        ant.replaceregexp(file:"$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match:"<xs:element name=\"response\" type=\"xp:responseType\" />", replace:"         <xs:element name=\"response\" type=\"xp:responseType\" />")
-        ant.replaceregexp(file:"$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match:"<xs:element name=\"message\" type=\"xs:string\" />", replace:"         <xs:element name=\"message\" type=\"xs:string\" />")
-        ant.replaceregexp(file:"$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match:"<xs:element name=\"responseTime\" type=\"xs:dateTime\" />", replace:"         <xs:element name=\"responseTime\" type=\"xs:dateTime\" />")
-        ant.replaceregexp(file:"$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match:"</xs:sequence>", replace:"        </xs:sequence> ")
-        ant.replaceregexp(file:"$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match:"", replace:"")
-        ant.replaceregexp(file:"$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match:"", replace:"")
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"enumeration value=(.*?3dsAuthenticated.*?)/>", replace:"enumeration value=\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"AUTHENTICATED_3DS\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"enumeration value=(.*?3dsAttempted.*?)/>", replace:"enumeration value=\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ATTEMPTED_3DS\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(element name=\"customerType\" minOccurs=\"0\".*?<xs:simpleType>)", replace:"\\1<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name=\"CustomerType\"/></xs:appinfo></xs:annotation>", flags:"s")
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(element name=\"residenceStatus\" minOccurs=\"0\".*?<xs:simpleType>)", replace:"\\1<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name=\"ResidenceStatus\"/></xs:appinfo></xs:annotation>", flags:"s")
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(element name=\"deliveryType\" minOccurs=\"0\".*?default=\"TBD\".*?<xs:simpleType>)", replace:"\\1<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name=\"DeliveryType\"/></xs:appinfo></xs:annotation>", flags:"s")
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"00\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"UNKNOWN\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"01\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"FEDERAL_NATIONAL_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"02\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"STATE_SALEX_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"03\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"CITY_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"04\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"LOCAL_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"05\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"MUNICIPAL_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"06\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"OTHER_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"10\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"VALUE_ADDED_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"11\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"GOODS_AND_SERVICES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"12\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"PROVINCIAL_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"13\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"HARMONIZED_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"14\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"QUEBEC_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"20\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ROOM_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"21\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"OCCUPANCY_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"22\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ENERGY_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"BLANK\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:element name=\"echeckVerification.*?)<xs:all>(.*?)</xs:all>(.*?</xs:element)", replace:"\\1<xs:sequence>\\2</xs:sequence>\\3", flags:"s")
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"<xs:element ref=\"xp:echeckOrEcheckToken\"\\s?/>", replace:"<xs:choice><xs:element name=\"echeck\" type=\"xp:echeckType\"/><xs:element name=\"echeckToken\" type=\"xp:echeckTokenType\"/></xs:choice>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"<xs:element ref=\"xp:echeckOrEcheckToken\" minOccurs=\"0\"\\s?/>", replace:"<xs:choice><xs:element name=\"echeck\" type=\"xp:echeckType\"/><xs:element name=\"echeckToken\" type=\"xp:echeckTokenType\"/></xs:choice>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(simpleType name=\"authenticationProtocolVersionType\">)", replace:"\\1<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name=\"AuthenticationProtocolVersionType\"/></xs:appinfo></xs:annotation>", flags:"s")
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(simpleType name=\"tlidValidationActionIndicatorType\">)", replace:"\\1<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name=\"TlidValidationActionIndicatorType\"/></xs:appinfo></xs:annotation>", flags:"s")
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"1\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ONE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"2\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"TWO\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"3\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"THREE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"4\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"FOUR\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"5\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"FIVE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"6\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"SIX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"7\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"SEVEN\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"8\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"EIGHT\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"9\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"NINE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"\\+\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"PLUS\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"0\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ZERO\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"1\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ONE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"2\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"TWO\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"3\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"THREE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"4\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"FOUR\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"5\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"FIVE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"6\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"SIX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"7\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"SEVEN\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"8\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"EIGHT\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
-        ant.replaceregexp(file:"$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match:"(<xs:enumeration value=\"9\")\\s?+/>", replace:"\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"NINE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline:true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(attributeFormDefault=\"unqualified\")>", replace: "\\1 xmlns:jaxb=\"https://jakarta.ee/xml/ns/jaxb\" jaxb:version=\"3.0\">", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(elementFormDefault=\"qualified\")>", replace: "\\1 xmlns:jaxb=\"https://jakarta.ee/xml/ns/jaxb\" jaxb:version=\"3.0\">", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "<xs:attribute name=\"id\" type=\"xp:string25Type\" use=\"required\"\\s*/>", replace: "       <xs:attribute name=\"id\" type=\"xp:string25Type\" use=\"required\" />", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "<xs:attribute name=\"id\" type=\"xp:stringMin1Max25CollapseWhiteSpaceType\" use=\"required\"\\s*/>", replace: "       <xs:attribute name=\"id\" type=\"xp:stringMin1Max25CollapseWhiteSpaceType\" use=\"required\" />", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "<xs:attribute name=\"customerId\" type=\"xp:customerIdType\" use=\"optional\"\\s*/>", replace: "       <xs:attribute name=\"customerId\" type=\"xp:customerIdType\" use=\"optional\"/>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match: "<xs:sequence>", replace: "        <xs:sequence>")
+        ant.replaceregexp(file: "$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match: "<xs:element name=\"cnpTxnId\" type=\"xp:cnpIdType\" />", replace: "         <xs:element name=\"cnpTxnId\" type=\"xp:cnpIdType\" />")
+        ant.replaceregexp(file: "$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match: "<xs:element name=\"response\" type=\"xp:responseType\" />", replace: "         <xs:element name=\"response\" type=\"xp:responseType\" />")
+        ant.replaceregexp(file: "$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match: "<xs:element name=\"message\" type=\"xs:string\" />", replace: "         <xs:element name=\"message\" type=\"xs:string\" />")
+        ant.replaceregexp(file: "$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match: "<xs:element name=\"responseTime\" type=\"xs:dateTime\" />", replace: "         <xs:element name=\"responseTime\" type=\"xs:dateTime\" />")
+        ant.replaceregexp(file: "$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match: "</xs:sequence>", replace: "        </xs:sequence> ")
+        ant.replaceregexp(file: "$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match: "", replace: "")
+        ant.replaceregexp(file: "$xsdOutput/cnpRecurring_v${SCHEMA_VERSION}.xsd", match: "", replace: "")
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "enumeration value=(.*?3dsAuthenticated.*?)/>", replace: "enumeration value=\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"AUTHENTICATED_3DS\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "enumeration value=(.*?3dsAttempted.*?)/>", replace: "enumeration value=\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ATTEMPTED_3DS\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(element name=\"customerType\" minOccurs=\"0\".*?<xs:simpleType>)", replace: "\\1<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name=\"CustomerType\"/></xs:appinfo></xs:annotation>", flags: "s")
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(element name=\"residenceStatus\" minOccurs=\"0\".*?<xs:simpleType>)", replace: "\\1<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name=\"ResidenceStatus\"/></xs:appinfo></xs:annotation>", flags: "s")
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(element name=\"deliveryType\" minOccurs=\"0\".*?default=\"TBD\".*?<xs:simpleType>)", replace: "\\1<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name=\"DeliveryType\"/></xs:appinfo></xs:annotation>", flags: "s")
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"00\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"UNKNOWN\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"01\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"FEDERAL_NATIONAL_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"02\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"STATE_SALEX_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"03\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"CITY_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"04\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"LOCAL_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"05\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"MUNICIPAL_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"06\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"OTHER_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"10\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"VALUE_ADDED_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"11\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"GOODS_AND_SERVICES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"12\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"PROVINCIAL_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"13\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"HARMONIZED_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"14\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"QUEBEC_SALES_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"20\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ROOM_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"21\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"OCCUPANCY_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"22\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ENERGY_TAX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"BLANK\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:element name=\"echeckVerification.*?)<xs:all>(.*?)</xs:all>(.*?</xs:element)", replace: "\\1<xs:sequence>\\2</xs:sequence>\\3", flags: "s")
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "<xs:element ref=\"xp:echeckOrEcheckToken\"\\s?/>", replace: "<xs:choice><xs:element name=\"echeck\" type=\"xp:echeckType\"/><xs:element name=\"echeckToken\" type=\"xp:echeckTokenType\"/></xs:choice>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "<xs:element ref=\"xp:echeckOrEcheckToken\" minOccurs=\"0\"\\s?/>", replace: "<xs:choice><xs:element name=\"echeck\" type=\"xp:echeckType\"/><xs:element name=\"echeckToken\" type=\"xp:echeckTokenType\"/></xs:choice>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(simpleType name=\"authenticationProtocolVersionType\">)", replace: "\\1<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name=\"AuthenticationProtocolVersionType\"/></xs:appinfo></xs:annotation>", flags: "s")
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(simpleType name=\"tlidValidationActionIndicatorType\">)", replace: "\\1<xs:annotation><xs:appinfo><jaxb:typesafeEnumClass name=\"TlidValidationActionIndicatorType\"/></xs:appinfo></xs:annotation>", flags: "s")
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"1\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ONE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"2\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"TWO\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"3\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"THREE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"4\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"FOUR\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"5\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"FIVE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"6\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"SIX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"7\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"SEVEN\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"8\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"EIGHT\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpTransaction_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"9\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"NINE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"\\+\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"PLUS\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"0\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ZERO\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"1\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"ONE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"2\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"TWO\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"3\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"THREE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"4\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"FOUR\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"5\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"FIVE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"6\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"SIX\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"7\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"SEVEN\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"8\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"EIGHT\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
+        ant.replaceregexp(file: "$xsdOutput/cnpCommon_v${SCHEMA_VERSION}.xsd", match: "(<xs:enumeration value=\"9\")\\s?+/>", replace: "\\1><xs:annotation><xs:appinfo><jaxb:typesafeEnumMember name=\"NINE\"/></xs:appinfo></xs:annotation></xs:enumeration>", byline: true)
 
     }
 }
@@ -220,27 +216,27 @@ task processXsd (type: Copy) {
 task generateJaxbClasses(dependsOn: processXsd) {
     compileJava.dependsOn it
     eclipseClasspath.dependsOn it
-    
+
     ext.bindingsFile = "src/main/xsd/bindings.xml"
     ext.generatedDir = xjcGeneratedDir
-    
+
     inputs.dir processXsd.xsdOutput
     inputs.file bindingsFile
     outputs.dir generatedDir
-    
+
     doFirst {
         mkdir generatedDir
     }
-     
+
     doLast {
-        ant.taskdef(name: "xjc", classname:"com.sun.tools.xjc.XJCTask", classpath:configurations.generateJAXB.asPath)
-        ant.xjc(destdir:"${generatedDir}", package: "io.github.vantiv.sdk.generate", binding:bindingsFile, extension:'true'){
-            schema(dir:"${processXsd.xsdOutput}", includes:"cnpOnline_v${SCHEMA_VERSION}.xsd,cnpBatch_v${SCHEMA_VERSION}.xsd")
+        ant.taskdef(name: "xjc", classname: "com.sun.tools.xjc.XJCTask", classpath: configurations.generateJAXB.asPath)
+        ant.xjc(destdir: "${generatedDir}", package: "io.github.vantiv.sdk.generate", binding: bindingsFile, extension: 'true') {
+            schema(dir: "${processXsd.xsdOutput}", includes: "cnpOnline_v${SCHEMA_VERSION}.xsd,cnpBatch_v${SCHEMA_VERSION}.xsd")
         }
     }
 }
 
-task testFunctional(type:Test, dependsOn: functionalTestClasses){
+task testFunctional(type: Test, dependsOn: functionalTestClasses) {
     check.dependsOn it
     classpath = sourceSets.functionalTest.runtimeClasspath
     mustRunAfter test
@@ -251,7 +247,7 @@ task testFunctional(type:Test, dependsOn: functionalTestClasses){
     }
 }
 
-task testCertification(type:Test, dependsOn: certificationTestClasses){
+task testCertification(type: Test, dependsOn: certificationTestClasses) {
     check.dependsOn it
     classpath = sourceSets.certificationTest.runtimeClasspath
     mustRunAfter testFunctional
@@ -264,16 +260,16 @@ task testCertification(type:Test, dependsOn: certificationTestClasses){
 
 jacocoTestReport {
     dependsOn testCertification
-    executionData(fileTree(dir:"${buildDir}/jacoco/", include:"*.exec"))
+    executionData(fileTree(dir: "${buildDir}/jacoco/", include: "*.exec"))
 }
 
-task copyJarToKit(type:Copy, dependsOn:[check,jar]){
+task copyJarToKit(type: Copy, dependsOn: [check, jar]) {
     from "${DIST_DIR}/lib/cnp-sdk-for-java-${JAR_VERSION}.jar"
     from "LICENSE"
     into KIT_DIR
 }
 
-task copyLibsToKit(type:Copy, dependsOn:check){
+task copyLibsToKit(type: Copy, dependsOn: check) {
     // Copy ALL resolved runtime jars (direct + transitive) so consumers using
     // the kit never need to add dependencies manually.
     // Covers: jsch, commons-io, httpclient5, httpcore5, httpcore5-h2, slf4j-api,
@@ -284,27 +280,27 @@ task copyLibsToKit(type:Copy, dependsOn:check){
     into KIT_DEPENDENCIES_DIR
 }
 
-task tarKit(type:Tar, dependsOn:[copyJarToKit, copyLibsToKit]){
+task tarKit(type: Tar, dependsOn: [copyJarToKit, copyLibsToKit]) {
     compression = Compression.GZIP
     getDestinationDirectory().set(file("$buildDir/kit"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.tar.gz")
     from "$buildDir/kit/java17"
 }
 
-task zipKit(type:Zip, dependsOn:[copyJarToKit, copyLibsToKit]){
+task zipKit(type: Zip, dependsOn: [copyJarToKit, copyLibsToKit]) {
     getDestinationDirectory().set(file("$buildDir/kit"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.zip")
     from "$buildDir/kit/java17"
 }
 
-task kit(dependsOn:[tarKit, zipKit]){
-if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
-    allprojects {
-      tasks.withType(Javadoc) {
-        options.addStringOption('Xdoclint:none', '-quiet')
-      }
+task kit(dependsOn: [tarKit, zipKit]) {
+    if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+        allprojects {
+            tasks.withType(Javadoc) {
+                options.addStringOption('Xdoclint:none', '-quiet')
+            }
+        }
     }
-  }
     build.dependsOn it
     dependsOn javadoc
 }
@@ -327,8 +323,8 @@ publishing {
                         url = 'https://github.com/Vantiv/cnp-sdk-for-java/blob/12.x/LICENSE'
                     }
                 }
-                developers{
-                    developer{
+                developers {
+                    developer {
                         id = 'vantivSDKSupport'
                         name = 'VantivSDKSupport'
                         email = 'sdksupport@fisglobal.com'
@@ -351,7 +347,7 @@ model {
     }
 }
 
-task sourceJar(type:Jar) {
+task sourceJar(type: Jar) {
     build.dependsOn it
     dependsOn generateJaxbClasses
     getDestinationDirectory().set(file("${buildDir}/kit"))

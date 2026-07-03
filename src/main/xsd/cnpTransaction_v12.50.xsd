@@ -2,8 +2,8 @@
            xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
            attributeFormDefault="unqualified">
 
-    <xs:include schemaLocation="cnpCommon_v12.49.xsd"/>
-    <xs:include schemaLocation="cnpRecurring_v12.49.xsd"/>
+    <xs:include schemaLocation="cnpCommon_v12.50.xsd"/>
+    <xs:include schemaLocation="cnpRecurring_v12.50.xsd"/>
 
     <xs:element name="transaction" type="xp:transactionType" abstract="true"/>
 
@@ -1677,6 +1677,7 @@
                             <xs:element ref="xp:customBilling" minOccurs="0"/>
                             <xs:element name="merchantData" type="xp:merchantDataType" minOccurs="0"/>
                             <xs:element name="customIdentifier" type="xp:string15Type" minOccurs="0"/>
+                            <xs:element ref="xp:identityBundle" minOccurs="0"/>
                         </xs:sequence>
                     </xs:choice>
                 </xs:extension>
@@ -1696,6 +1697,7 @@
                                 <xs:element name="secondaryAmount" type="xp:transactionAmountType" minOccurs="0"/>
                                 <xs:element ref="xp:customBilling" minOccurs="0"/>
                                 <xs:element name="customIdentifier" type="xp:string15Type" minOccurs="0"/>
+                                <xs:element ref="xp:identityBundle" minOccurs="0"/>
                             </xs:sequence>
                             <xs:sequence>
                                 <xs:element name="orderId" type="xp:string256Type"/>
@@ -1710,6 +1712,7 @@
                                 <xs:element ref="xp:customBilling" minOccurs="0"/>
                                 <xs:element name="merchantData" type="xp:merchantDataType" minOccurs="0"/>
                                 <xs:element name="customIdentifier" type="xp:string15Type" minOccurs="0"/>
+                                <xs:element ref="xp:identityBundle" minOccurs="0"/>
                             </xs:sequence>
                         </xs:choice>
                     </xs:sequence>
@@ -1895,6 +1898,7 @@
                         </xs:choice>
                         <xs:element name="merchantData" type="xp:merchantDataType" minOccurs="0"/>
                         <xs:element name="customIdentifier" type="xp:string15Type" minOccurs="0"/>
+                        <xs:element ref="xp:identityBundle" minOccurs="0"/>
                     </xs:sequence>
                 </xs:extension>
             </xs:complexContent>
@@ -2073,6 +2077,10 @@
             <xs:enumeration value="applepay"/>
             <xs:enumeration value="androidpay"/>
             <xs:enumeration value="ecommerceDataOnly"/>
+            <xs:enumeration value="paze"/>
+            <xs:enumeration value="samsungpay"/>
+            <xs:enumeration value="amazonpay"/>
+            <xs:enumeration value="googlepay"/>
         </xs:restriction>
     </xs:simpleType>
 

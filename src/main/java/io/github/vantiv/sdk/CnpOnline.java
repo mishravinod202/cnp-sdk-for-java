@@ -615,6 +615,21 @@ public class CnpOnline {
         return txnTypeWithReportGroup.getValue();
     }
 
+    public QueryDpoWalletBalanceResponse queryDpoWalletBalance(QueryDpoWalletBalance queryDpoWalletBalance) {
+        CnpOnlineRequest request = createCnpOnlineRequest();
+        return queryDpoWalletBalance(queryDpoWalletBalance, request);
+    }
+
+    public QueryDpoWalletBalanceResponse queryDpoWalletBalance(QueryDpoWalletBalance queryDpoWalletBalance, CnpOnlineRequest overrides) {
+        CnpOnlineRequest request = fillInMissingFieldsFromConfig(overrides);
+        fillInReportGroup(queryDpoWalletBalance);
+
+        request.setTransaction(CnpContext.getObjectFactory().createQueryDpoWalletBalance(queryDpoWalletBalance));
+        CnpOnlineResponse response = sendToCnp(request);
+        JAXBElement<? extends TransactionTypeWithReportGroup> newresponse = response.getTransactionResponse();
+        return (QueryDpoWalletBalanceResponse) newresponse.getValue();
+    }
+
     public GiftCardCaptureResponse giftCardCapture(GiftCardCapture giftCardCapture) {
     	CnpOnlineRequest request = createCnpOnlineRequest();
         return giftCardCapture(giftCardCapture, request);
