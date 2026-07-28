@@ -2,8 +2,8 @@
            xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
            attributeFormDefault="unqualified">
 
-    <xs:include schemaLocation="cnpCommon_v12.50.xsd"/>
-    <xs:include schemaLocation="cnpRecurring_v12.50.xsd"/>
+    <xs:include schemaLocation="cnpCommon_v12.51.xsd"/>
+    <xs:include schemaLocation="cnpRecurring_v12.51.xsd"/>
 
     <xs:element name="transaction" type="xp:transactionType" abstract="true"/>
 

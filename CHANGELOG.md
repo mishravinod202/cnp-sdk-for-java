@@ -1,5 +1,12 @@
 # Vantiv eCommerce CNP CHANGELOG
 
+## Change Log for 12.51 (July 27, 2026)
+
+- Change: Upgraded SDK to cnpAPI v12.51.
+- Change: [cnpAPI v12.51]: In `cnpBatch_v12.51.xsd`, `batchTotalAmountType` restriction `totalDigits` increased from **10** to **12**, allowing batch amount totals up to 999,999,999,999.
+- Change: Added `setId(String id)` and `getId()` methods to `CnpBatchRequest` to expose the `id` attribute (type `string25Type`) of the `cnpBatch` element, enabling callers to assign a custom identifier to each batch request.
+- Change: Added unit tests in `TestCnpBatchRequest` to validate the 12-digit `batchTotalAmountType` limit (XSD validation and amount accumulation) and the new `setId`/`getId` behaviour.
+
 ## Change Log for 12.50 (June 26, 2026)
 
 - Change: Added ANT commands to enable support for Integer values in enumeration definitions

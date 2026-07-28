@@ -2744,6 +2744,8 @@ public class TestBatchFile {
         vcreditRtpFalse.setRtp(false);
         batch.addTransaction(vcreditRtpFalse);
 
+        batch.setId("testBatchId01");
+
         int transactionCount = batch.getNumberOfTransactions();
 
         CnpBatchFileResponse fileResponse = request.sendToCnpSFTP();
