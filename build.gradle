@@ -110,12 +110,6 @@ jar {
     manifest {
         attributes("Implementation-Title": "Cnp SDK For Java 1.5 and greater", "Implementation-Version": "${JAR_VERSION}", "Implementation-Vendor": "Cnp&Co", "Main-Class": "io.github.vantiv.sdk.Setup")
     }
-    // Produce a self-contained distributable jar for file-based consumers.
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
 
     getDestinationDirectory().set(file("${DIST_DIR}/lib"))
     getArchiveFileName().set("cnp-sdk-for-java-${JAR_VERSION}.jar")
