@@ -1,5 +1,12 @@
 # Vantiv eCommerce CNP CHANGELOG
 
+## Change Log for 12.51.0_jdk17 (July 30, 2026)
+
+* Change: Upgraded SDK to cnpAPI v12.51.
+* Change: [cnpAPI v12.51]: In `cnpBatch_v12.51.xsd`, `batchTotalAmountType` restriction `totalDigits` increased from **10** to **12**, allowing batch amount totals up to 999,999,999,999.
+* Change: Added `setId(String id)` and `getId()` methods to `CnpBatchRequest` to expose the `id` attribute (type `string25Type`) of the `cnpBatch` element, enabling callers to assign a custom identifier to each batch request.
+* Change: Added unit tests in `TestCnpBatchRequest` to validate the 12-digit `batchTotalAmountType` limit (XSD validation and amount accumulation) and the new `setId`/`getId` behaviour.
+
 ## Change Log for 12.50.0_jdk17 (June 30, 2026)
 * Change: [cnpAPI v12.50]: New transaction type `queryDpoWalletBalance` added to query DPO wallet balance. Returns `queryDpoWalletBalanceResponse` with fields: `projectedAvailableBalance`, `reserveBalance`, `availableRtpBalance`, `asOfDate`, and `lastUpdatedDate`.
 * Change: [cnpAPI v12.50]: New optional element `identityBundle` added to `authorization`, `authReversal`, `sale`, and `credit` transaction requests.

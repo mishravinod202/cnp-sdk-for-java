@@ -1,6 +1,7 @@
 package io.github.vantiv.sdk;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
@@ -678,6 +679,75 @@ public class TestCnpBatchRequest {
         applepayType.setSignature("sign");
         applepayType.setVersion("1");
         return applepayType;
+    }
+
+
+    /**
+     * Validates that transaction amounts accumulating to a 12-digit total are handled
+     * correctly by CnpBatchRequest (batchTotalAmountType expanded from 10 to 12 digits in v12.51.0).
+     */
+    @Test
+    public void testBatchTotalAmountType_12DigitAccumulation() {
+        cnpBatchFileRequest = new CnpBatchFileRequest("testFile", property);
+        cnpBatchFileRequest.setId("batch1");
+        cnpBatchRequest = cnpBatchFileRequest.createBatch("101");
+        cnpBatchRequest.setNumOfTxn(1);
+        cnpBatchRequest.setId("batch1");
+
+        Marshaller mockMarshaller = Mockito.mock(Marshaller.class);
+        cnpBatchRequest.setMarshaller(mockMarshaller);
+
+        // Use an amount just above the old 10-digit max (9999999999 = 10 digits)
+        // to confirm 11- and 12-digit totals are now handled correctly.
+        Sale sale1 = new Sale();
+        sale1.setAmount(10000000000L); // 11 digits
+        sale1.setOrderId("order1");
+        sale1.setOrderSource(OrderSourceType.ECOMMERCE);
+        CardType card = new CardType();
+        card.setType(MethodOfPaymentTypeEnum.VI);
+        card.setNumber("4100000000000002");
+        card.setExpDate("1210");
+        sale1.setCard(card);
+        sale1.setReportGroup("test");
+        cnpBatchRequest.addTransaction(sale1);
+
+        Sale sale2 = new Sale();
+        sale2.setAmount(989999999999L); // brings total to 999999999999 (12 digits)
+        sale2.setOrderId("order2");
+        sale2.setOrderSource(OrderSourceType.ECOMMERCE);
+        sale2.setCard(card);
+        sale2.setReportGroup("test");
+        cnpBatchRequest.addTransaction(sale2);
+
+        BigInteger expectedTotal = BigInteger.valueOf(999999999999L);
+        assertEquals("12-digit saleAmount total should be tracked correctly",
+                expectedTotal, cnpBatchRequest.getBatchRequest().getSaleAmount());
+        assertEquals(2, cnpBatchRequest.getBatchRequest().getNumSales().intValue());
+        assertEquals("batch1", cnpBatchRequest.getBatchRequest().getId());
+    }
+
+    @Test
+    public void testSetId() {
+        cnpBatchFileRequest = new CnpBatchFileRequest("testFile", property);
+        cnpBatchRequest = cnpBatchFileRequest.createBatch("101");
+
+        assertNull(cnpBatchRequest.getId());
+
+        cnpBatchRequest.setId("myBatch001");
+        cnpBatchRequest.getBatchRequest().setId("myBatch001");
+        assertEquals("myBatch001", cnpBatchRequest.getId());
+        assertEquals("myBatch001", cnpBatchRequest.getBatchRequest().getId());
+    }
+
+    @Test
+    public void testSetIdMaxLength() {
+        cnpBatchFileRequest = new CnpBatchFileRequest("testFile", property);
+        cnpBatchRequest = cnpBatchFileRequest.createBatch("101");
+
+        // string25Type allows up to 25 characters
+        String maxId = "1234567890123456789012345";
+        cnpBatchRequest.setId(maxId);
+        assertEquals(maxId, cnpBatchRequest.getId());
     }
 
 }

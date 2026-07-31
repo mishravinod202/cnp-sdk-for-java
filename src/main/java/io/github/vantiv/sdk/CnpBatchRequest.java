@@ -482,6 +482,24 @@ public class CnpBatchRequest {
         this.numOfTxn = numOfTxn;
     }
 
+    /**
+     * Sets the id attribute on the batch request element.
+     * Corresponds to the {@code id} attribute (type {@code string25Type}) on the
+     * {@code cnpBatch} element defined in cnpBatch_v12.51.xsd.
+     *
+     * @param id the batch request identifier (max 25 characters)
+     */
+    public void setId(String id) {
+        this.batchRequest.setId(id);
+    }
 
+    /**
+     * Returns the id attribute of the batch request element.
+     *
+     * @return the batch request identifier, or {@code null} if not set
+     */
+    public String getId() {
+        return this.batchRequest.getId();
+    }
 
 }
