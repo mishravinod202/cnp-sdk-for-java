@@ -251,10 +251,12 @@ public class Communication {
 
         Long start = System.currentTimeMillis();
         Long timeout = Long.parseLong(configuration.getProperty("sftpTimeout"));
+        long pollIntervalMs = Long.parseLong(
+                configuration.getProperty("sftpPollIntervalMillis", "45000"));
         System.out.println("Retrieving from sFTP...");
         while (System.currentTimeMillis() - start < timeout) {
             try {
-                Thread.sleep(45000);
+                Thread.sleep(pollIntervalMs);
             }
             catch (InterruptedException e) {
                 System.out.println(e);

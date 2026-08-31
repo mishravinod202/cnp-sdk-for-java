@@ -166,6 +166,10 @@ public class Setup {
         lastUserInput = input.readLine();
         config.setProperty("sftpTimeout", ((lastUserInput.length() == 0) ? "7200000" : lastUserInput));
 
+        System.out.print("Please input the sFTP poll interval in milliseconds (leave blank for default (45000)): ");
+        lastUserInput = input.readLine();
+        config.setProperty("sftpPollIntervalMillis", ((lastUserInput.length() == 0) ? "45000" : lastUserInput));
+
 
         System.out.print("\nPlease input the proxy host, if no proxy hit enter: ");
         lastUserInput = input.readLine();

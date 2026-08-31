@@ -5,6 +5,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -28,6 +32,14 @@ public class CnpBatchFileRequest{
 	private String requestId;
 	private Marshaller marshaller;
 	private Configuration config = null;
+
+	/**
+	 * Unique identifier for this instance, used to guarantee that temporary files
+	 * produced during {@link #prepareForDelivery()} do not collide with those of
+	 * other {@code CnpBatchFileRequest} instances running concurrently in the same
+	 * {@code batchRequestFolder}.
+	 */
+	private final String instanceId = UUID.randomUUID().toString();
 
     protected int maxAllowedTransactionsPerFile;
 
@@ -225,7 +237,7 @@ public class CnpBatchFileRequest{
                     "batchTcpTimeout", "batchUseSSL",
                     "maxAllowedTransactionsPerFile", "maxTransactionsPerBatch",
                     "batchRequestFolder", "batchResponseFolder", "sftpUsername", "sftpPassword", "sftpTimeout",
-                    "merchantId", "printxml", "useEncryption", "VantivPublicKeyPath", "PrivateKeyPath", "PublicKeyPath", "gpgPassphrase", "deleteBatchFiles"};
+                    "sftpPollIntervalMillis", "merchantId", "printxml", "useEncryption", "VantivPublicKeyPath", "PrivateKeyPath", "PublicKeyPath", "gpgPassphrase", "deleteBatchFiles"};
 
             for (String prop : allProperties) {
                 // if the value of a property is not set,
@@ -589,6 +601,244 @@ public class CnpBatchFileRequest{
 
     public boolean isFull() {
         return (getNumberOfTransactionInFile() == this.maxAllowedTransactionsPerFile);
+    }
+
+    // =========================================================================
+    // Thread-safe / concurrent API
+    // =========================================================================
+
+    /**
+     * Thread-safe variant of {@link #createBatch(String)}.
+     * <p>
+     * Uses the per-instance {@link #instanceId} together with a random UUID to
+     * build a temp file path that is guaranteed to be unique across all
+     * concurrently running {@code CnpBatchFileRequest} instances, even when they
+     * share the same {@code batchRequestFolder}.
+     *
+     * @param merchantId merchant ID for the new batch
+     * @return a newly created, thread-safe {@link CnpBatchRequest}
+     * @throws CnpBatchException if the batch cannot be created
+     */
+    public CnpBatchRequest createBatchConcurrent(String merchantId) throws CnpBatchException {
+        CnpBatchRequest cnpBatchRequest = new CnpBatchRequest(merchantId, this,
+                instanceId + "-" + UUID.randomUUID().toString());
+        cnpBatchRequestList.add(cnpBatchRequest);
+        return cnpBatchRequest;
+    }
+
+    /**
+     * Thread-safe variant of {@link #prepareForDelivery()}.
+     * <p>
+     * Identical to {@code prepareForDelivery()} except that the intermediate
+     * temporary file is named using the per-instance {@link #instanceId} so that
+     * concurrent instances sharing the same {@code batchRequestFolder} do not
+     * overwrite each other's in-flight work.
+     *
+     * @throws CnpBatchException if an I/O error occurs while assembling the request file
+     */
+    public void prepareForDeliveryConcurrent() {
+        if ("true".equalsIgnoreCase(properties.getProperty("useEncryption"))) {
+            prepareForEncryptedDelivery();
+        } else {
+            try {
+                String writeFolderPath = this.properties.getProperty("batchRequestFolder");
+                File tmpDir = new File(writeFolderPath + "/tmp");
+                tmpDir.mkdirs();
+                tempBatchRequestFile = new File(tmpDir, "tempBatch-" + instanceId);
+                OutputStream batchReqWriter = new FileOutputStream(tempBatchRequestFile.getAbsoluteFile());
+                byte[] readData = new byte[1024];
+                for (CnpBatchRequest batchReq : cnpBatchRequestList) {
+                    batchReq.closeFile();
+                    String batchRequestXml = buildBatchRequestXml(batchReq);
+                    batchRequestXml = batchRequestXml.replaceFirst("/>", ">");
+                    FileInputStream fis = new FileInputStream(batchReq.getFile());
+                    batchReqWriter.write(batchRequestXml.getBytes());
+                    int i = fis.read(readData);
+                    while (i != -1) {
+                        batchReqWriter.write(readData, 0, i);
+                        i = fis.read(readData);
+                    }
+                    batchReqWriter.write(("</batchRequest>\n").getBytes());
+                    fis.close();
+                    batchReq.getFile().delete();
+                }
+                batchReqWriter.close();
+                generateRequestFile();
+                // Do NOT delete the tmp directory here — other concurrent instances
+                // may still need it. The individual temp file is deleted inside
+                // generateRequestFile(), so no resources are leaked.
+            } catch (IOException ioe) {
+                throw new CnpBatchException(
+                        "There was an exception while creating the Cnp Request file. " +
+                                "Check to see if the current user has permission to read and write to " +
+                                this.properties.getProperty("batchRequestFolder"), ioe);
+            }
+        }
+    }
+
+    /**
+     * Thread-safe variant of {@link #sendOnlyToCnpSFTP()}.
+     * <p>
+     * Uses {@link #prepareForDeliveryConcurrent()} so that the intermediate temp file is
+     * named uniquely per instance and concurrent senders do not collide on the same
+     * {@code batchRequestFolder}.
+     *
+     * @throws CnpBatchException if an I/O error occurs during sending
+     */
+    public void sendOnlyToCnpSFTPConcurrent() throws CnpBatchException {
+        try {
+            prepareForDeliveryConcurrent();
+            communication.sendCnpRequestFileToSFTP(requestFile, properties);
+            checkDeleteBatchRequestFiles();
+        } catch (IOException e) {
+            throw new CnpBatchException("There was an exception while creating the Cnp Request file. " +
+                    "Check to see if the current user has permission to read and write to " +
+                    this.properties.getProperty("batchRequestFolder"), e);
+        }
+    }
+
+    /**
+     * Thread-safe variant of {@link #sendToCnpSFTP()}.
+     * Prepares, sends, and retrieves the batch file in a single blocking call.
+     * Safe to invoke concurrently from multiple threads, each on its own
+     * {@code CnpBatchFileRequest} instance.
+     *
+     * @return a {@link CnpBatchFileResponse} containing responses for all transactions
+     * @throws CnpBatchException if an I/O error occurs during the operation
+     */
+    public CnpBatchFileResponse sendToCnpSFTPConcurrent() throws CnpBatchException {
+        return sendToCnpSFTPConcurrent(false);
+    }
+
+    /**
+     * Thread-safe variant of {@link #sendToCnpSFTP(boolean)}.
+     *
+     * @param useExistingFile when {@code true} skips file preparation
+     * @return a {@link CnpBatchFileResponse} containing responses for all transactions
+     * @throws CnpBatchException if an I/O error occurs during the operation
+     */
+    public CnpBatchFileResponse sendToCnpSFTPConcurrent(boolean useExistingFile) throws CnpBatchException {
+        sendOnlyToCnpSFTPConcurrent();
+        return retrieveOnlyFromCnpSFTP();
+    }
+
+    /**
+     * Submits this batch file request to Vantiv over sFTP asynchronously using the
+     * supplied {@link ExecutorService}. Each {@code CnpBatchFileRequest} instance is
+     * fully self-contained; multiple instances can therefore be submitted to the same
+     * executor simultaneously without any contention over temporary file resources.
+     *
+     * <p>Example — sending four batch files in parallel:
+     * <pre>
+     * ExecutorService executor = Executors.newFixedThreadPool(4);
+     * List&lt;Future&lt;CnpBatchFileResponse&gt;&gt; futures = new ArrayList&lt;&gt;();
+     *
+     * for (CnpBatchFileRequest req : batchRequests) {
+     *     futures.add(req.sendToCnpSFTPConcurrent(executor));
+     * }
+     *
+     * for (Future&lt;CnpBatchFileResponse&gt; future : futures) {
+     *     CnpBatchFileResponse response = future.get();   // blocks until that file is done
+     *     // process response ...
+     * }
+     * executor.shutdown();
+     * </pre>
+     *
+     * @param executor the {@link ExecutorService} used to execute the operation
+     * @return a {@link Future} that will hold the {@link CnpBatchFileResponse} on completion
+     */
+    public Future<CnpBatchFileResponse> sendToCnpSFTPConcurrent(final ExecutorService executor) {
+        return executor.submit(new Callable<CnpBatchFileResponse>() {
+            @Override
+            public CnpBatchFileResponse call() throws Exception {
+                return sendToCnpSFTPConcurrent(false);
+            }
+        });
+    }
+
+    /**
+     * Async variant of {@link #sendOnlyToCnpSFTPConcurrent()} that executes
+     * on the supplied {@link ExecutorService}.
+     *
+     * <p>Delegates to {@link #sendOnlyToCnpSFTPConcurrent()}, which uses
+     * {@link #prepareForDeliveryConcurrent()} to guarantee that the intermediate
+     * temp file is named uniquely per instance.
+     * Multiple instances can therefore call this method concurrently on the same executor
+     * and the same {@code batchRequestFolder} without colliding.
+     *
+     * <p>Use this with {@link #retrieveOnlyFromCnpSFTPConcurrent(ExecutorService)} to
+     * pipeline the two steps independently:
+     * <pre>
+     * ExecutorService executor = Executors.newFixedThreadPool(N);
+     *
+     * // Phase 1 – send all files in parallel
+     * List&lt;Future&lt;Void&gt;&gt; sendFutures = new ArrayList&lt;&gt;();
+     * for (CnpBatchFileRequest req : requests) {
+     *     sendFutures.add(req.sendOnlyToCnpSFTPConcurrent(executor));
+     * }
+     * for (Future&lt;Void&gt; f : sendFutures) f.get();  // wait for all sends
+     *
+     * // Phase 2 – retrieve all responses in parallel
+     * List&lt;Future&lt;CnpBatchFileResponse&gt;&gt; retrieveFutures = new ArrayList&lt;&gt;();
+     * for (CnpBatchFileRequest req : requests) {
+     *     retrieveFutures.add(req.retrieveOnlyFromCnpSFTPConcurrent(executor));
+     * }
+     * for (Future&lt;CnpBatchFileResponse&gt; f : retrieveFutures) {
+     *     CnpBatchFileResponse response = f.get();
+     *     // process response ...
+     * }
+     * executor.shutdown();
+     * </pre>
+     *
+     * @param executor the {@link ExecutorService} used to execute the send operation
+     * @return a {@link Future} that completes (with {@code null} value) when the
+     *         file has been sent and any request-side cleanup is done
+     */
+    public Future<Void> sendOnlyToCnpSFTPConcurrent(final ExecutorService executor) {
+        return executor.submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                sendOnlyToCnpSFTPConcurrent();
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Retrieves the batch response file from Vantiv over sFTP.
+     *
+     * <p>{@link #retrieveOnlyFromCnpSFTP()} is already safe to call concurrently
+     * from different {@code CnpBatchFileRequest} instances: every instance owns its
+     * own {@code requestFile}, {@code responseFile}, {@code communication}, and
+     * {@code properties}, so there is no shared mutable state between instances.
+     * This method exists for naming symmetry with the rest of the concurrent API and
+     * to make the two-step send/retrieve workflow explicit.
+     *
+     * @return a {@link CnpBatchFileResponse} containing responses for all transactions
+     * @throws CnpBatchException if an I/O error occurs during retrieval
+     * @see #retrieveOnlyFromCnpSFTP()
+     */
+    public CnpBatchFileResponse retrieveOnlyFromCnpSFTPConcurrent() throws CnpBatchException {
+        return retrieveOnlyFromCnpSFTP();
+    }
+
+    /**
+     * Async variant of {@link #retrieveOnlyFromCnpSFTPConcurrent()} that executes
+     * on the supplied {@link ExecutorService}.
+     *
+     * <p>Each instance operates on its own response file, so multiple instances can
+     * execute this method on the same executor simultaneously without interference.
+     *
+     * @param executor the {@link ExecutorService} used to execute the retrieve operation
+     * @return a {@link Future} that will hold the {@link CnpBatchFileResponse} on completion
+     */
+    public Future<CnpBatchFileResponse> retrieveOnlyFromCnpSFTPConcurrent(final ExecutorService executor) {
+        return executor.submit(new Callable<CnpBatchFileResponse>() {
+            @Override
+            public CnpBatchFileResponse call() throws Exception {
+                return retrieveOnlyFromCnpSFTPConcurrent();
+            }
+        });
     }
 
 }

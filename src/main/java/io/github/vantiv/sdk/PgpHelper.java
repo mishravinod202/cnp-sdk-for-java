@@ -18,6 +18,12 @@ import org.bouncycastle.openpgp.operator.jcajce.*;
 
 public class PgpHelper {
 
+    static {
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
+    }
+
     /**
      *
      * @param in InputStream to file containing Pgp Public key
@@ -115,7 +121,6 @@ public class PgpHelper {
     public static InputStream decryptionStream(String inputFilepath,  String privateKeyPath, String pp)
             throws IOException, PGPException {
         InputStream fileInputStream = new FileInputStream(inputFilepath);
-        Security.addProvider(new BouncyCastleProvider());
         fileInputStream = PGPUtil.getDecoderStream(fileInputStream);
         JcaPGPObjectFactory jcaPGPObjectFactory = new JcaPGPObjectFactory(fileInputStream);
         PGPEncryptedDataList encryptedDataList;
@@ -208,7 +213,6 @@ public class PgpHelper {
         OutputStream fileOutputStream = new FileOutputStream(outputFilepath);
         fileOutputStream = new ArmoredOutputStream(fileOutputStream);
         PGPPublicKey pgpPublicKey = readPublicKey(new FileInputStream(publicKeyPath));
-        Security.addProvider(new BouncyCastleProvider());
 
         JcePGPDataEncryptorBuilder c = new JcePGPDataEncryptorBuilder(PGPEncryptedData.CAST5).setSecureRandom(new SecureRandom()).setProvider("BC");
 
@@ -236,7 +240,6 @@ public class PgpHelper {
         ArmoredOutputStream armoredOut = new ArmoredOutputStream(encOut);
         armoredOut.setHeader("Version", "BCPG v1.78");
         PGPPublicKey pgpPublicKey = readPublicKey(new FileInputStream(publicKeyPath));
-        Security.addProvider(new BouncyCastleProvider());
 
         byte[] bytes = compressFile(plainText, CompressionAlgorithmTags.ZIP);
 

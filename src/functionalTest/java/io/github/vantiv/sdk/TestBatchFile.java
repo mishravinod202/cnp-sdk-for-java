@@ -2769,4 +2769,188 @@ public class TestBatchFile {
         assertEquals(transactionCount, txns);
     }
 
+    /**
+     * Verifies that a single {@link CnpBatchFileRequest} can contain multiple
+     * {@link CnpBatchRequest} groups for the same merchant ID, and that all
+     * transactions from every group are returned in the response.
+     */
+    @Test
+    public void testMultipleBatchesSameMerchantId() {
+        Assume.assumeFalse(preliveStatus.equalsIgnoreCase("down"));
+
+        String requestFileName = "cnpSdk-testBatchFile-MultiBatchSameMid-" + TIME_STAMP + ".xml";
+        CnpBatchFileRequest request = new CnpBatchFileRequest(requestFileName);
+        Properties configFromFile = request.getConfig();
+        assertEquals("payments.vantivprelive.com", configFromFile.getProperty("batchHost"));
+
+        String merchantId = configFromFile.getProperty("merchantId");
+
+        CardType card = new CardType();
+        card.setNumber("4100000000000001");
+        card.setExpDate("1210");
+        card.setType(MethodOfPaymentTypeEnum.VI);
+
+        // Batch 1 — first group of transactions for the same MID
+        CnpBatchRequest batch1 = request.createBatch(merchantId);
+
+        Sale sale1 = new Sale();
+        sale1.setReportGroup("Planets");
+        sale1.setOrderId("multiBatch-sale1");
+        sale1.setAmount(1000L);
+        sale1.setOrderSource(OrderSourceType.ECOMMERCE);
+        sale1.setCard(card);
+        sale1.setId("id");
+        batch1.addTransaction(sale1);
+
+        Authorization auth1 = new Authorization();
+        auth1.setReportGroup("Planets");
+        auth1.setOrderId("multiBatch-auth1");
+        auth1.setAmount(500L);
+        auth1.setOrderSource(OrderSourceType.ECOMMERCE);
+        auth1.setCard(card);
+        auth1.setId("id");
+        batch1.addTransaction(auth1);
+
+        // Batch 2 — second group of transactions for the same MID in the same file
+        CnpBatchRequest batch2 = request.createBatch(merchantId);
+
+        Sale sale2 = new Sale();
+        sale2.setReportGroup("Planets");
+        sale2.setOrderId("multiBatch-sale2");
+        sale2.setAmount(2000L);
+        sale2.setOrderSource(OrderSourceType.ECOMMERCE);
+        sale2.setCard(card);
+        sale2.setId("id");
+        batch2.addTransaction(sale2);
+
+        Authorization auth2 = new Authorization();
+        auth2.setReportGroup("Planets");
+        auth2.setOrderId("multiBatch-auth2");
+        auth2.setAmount(750L);
+        auth2.setOrderSource(OrderSourceType.ECOMMERCE);
+        auth2.setCard(card);
+        auth2.setId("id");
+        batch2.addTransaction(auth2);
+
+        int totalTransactions = batch1.getNumberOfTransactions() + batch2.getNumberOfTransactions();
+
+        CnpBatchFileResponse fileResponse = request.sendToCnpSFTP();
+
+        ResponseValidatorProcessor processor = new ResponseValidatorProcessor();
+        int txns = 0;
+
+        // Two separate batchResponse blocks expected — one per createBatch() call
+        CnpBatchResponse batchResponse1 = fileResponse.getNextCnpBatchResponse();
+        assertNotNull(batchResponse1);
+        assertEquals(merchantId, batchResponse1.getMerchantId());
+        while (batchResponse1.processNextTransaction(processor)) {
+            txns++;
+        }
+
+        CnpBatchResponse batchResponse2 = fileResponse.getNextCnpBatchResponse();
+        assertNotNull(batchResponse2);
+        assertEquals(merchantId, batchResponse2.getMerchantId());
+        while (batchResponse2.processNextTransaction(processor)) {
+            txns++;
+        }
+
+        assertEquals(totalTransactions, txns);
+        assertEquals(totalTransactions, processor.responseCount);
+    }
+
+    /**
+     * Verifies that a single {@link CnpBatchFileRequest} can contain
+     * {@link CnpBatchRequest} groups for two different merchant IDs, and that
+     * each response batch carries the correct merchant ID.
+     *
+     * <p>Configure {@code merchantId2} in the SDK properties file to use a
+     * distinct second merchant. If {@code merchantId2} is absent, the test
+     * falls back to the primary {@code merchantId} so that it can run in
+     * single-merchant environments while still exercising the multi-batch code path.
+     */
+    @Test
+    public void testMultipleBatchesDifferentMerchantIds() {
+        Assume.assumeFalse(preliveStatus.equalsIgnoreCase("down"));
+
+        String requestFileName = "cnpSdk-testBatchFile-MultiBatchDiffMid-" + TIME_STAMP + ".xml";
+        CnpBatchFileRequest request = new CnpBatchFileRequest(requestFileName);
+        Properties configFromFile = request.getConfig();
+        assertEquals("payments.vantivprelive.com", configFromFile.getProperty("batchHost"));
+
+        String merchantId1 = configFromFile.getProperty("merchantId");
+        // Falls back to the primary MID if merchantId2 is not set in the config file
+        String merchantId2 = configFromFile.getProperty("merchantId2", merchantId1);
+
+        CardType card = new CardType();
+        card.setNumber("4100000000000001");
+        card.setExpDate("1210");
+        card.setType(MethodOfPaymentTypeEnum.VI);
+
+        // Batch 1 — transactions under merchantId1
+        CnpBatchRequest batch1 = request.createBatch(merchantId1);
+
+        Sale sale1 = new Sale();
+        sale1.setReportGroup("Planets");
+        sale1.setOrderId("diffMid-sale1");
+        sale1.setAmount(1000L);
+        sale1.setOrderSource(OrderSourceType.ECOMMERCE);
+        sale1.setCard(card);
+        sale1.setId("id");
+        batch1.addTransaction(sale1);
+
+        Authorization auth1 = new Authorization();
+        auth1.setReportGroup("Planets");
+        auth1.setOrderId("diffMid-auth1");
+        auth1.setAmount(500L);
+        auth1.setOrderSource(OrderSourceType.ECOMMERCE);
+        auth1.setCard(card);
+        auth1.setId("id");
+        batch1.addTransaction(auth1);
+
+        // Batch 2 — transactions under merchantId2 (distinct merchant in the same file)
+        CnpBatchRequest batch2 = request.createBatch(merchantId2);
+
+        Sale sale2 = new Sale();
+        sale2.setReportGroup("Planets");
+        sale2.setOrderId("diffMid-sale2");
+        sale2.setAmount(2000L);
+        sale2.setOrderSource(OrderSourceType.ECOMMERCE);
+        sale2.setCard(card);
+        sale2.setId("id");
+        batch2.addTransaction(sale2);
+
+        Authorization auth2 = new Authorization();
+        auth2.setReportGroup("Planets");
+        auth2.setOrderId("diffMid-auth2");
+        auth2.setAmount(750L);
+        auth2.setOrderSource(OrderSourceType.ECOMMERCE);
+        auth2.setCard(card);
+        auth2.setId("id");
+        batch2.addTransaction(auth2);
+
+        int totalTransactions = batch1.getNumberOfTransactions() + batch2.getNumberOfTransactions();
+
+        CnpBatchFileResponse fileResponse = request.sendToCnpSFTP();
+
+        ResponseValidatorProcessor processor = new ResponseValidatorProcessor();
+        int txns = 0;
+
+        CnpBatchResponse batchResponse1 = fileResponse.getNextCnpBatchResponse();
+        assertNotNull(batchResponse1);
+        assertEquals(merchantId1, batchResponse1.getMerchantId());
+        while (batchResponse1.processNextTransaction(processor)) {
+            txns++;
+        }
+
+        CnpBatchResponse batchResponse2 = fileResponse.getNextCnpBatchResponse();
+        assertNotNull(batchResponse2);
+        assertEquals(merchantId2, batchResponse2.getMerchantId());
+        while (batchResponse2.processNextTransaction(processor)) {
+            txns++;
+        }
+
+        assertEquals(totalTransactions, txns);
+        assertEquals(totalTransactions, processor.responseCount);
+    }
+
 }

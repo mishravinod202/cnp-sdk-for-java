@@ -2,8 +2,6 @@ package io.github.vantiv.sdk;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Properties;
 
@@ -71,6 +69,43 @@ public class CnpBatchRequest {
 
 	BatchRequest getBatchRequest(){
 		return batchRequest;
+	}
+
+	/**
+	 * Thread-safe constructor for {@link CnpBatchRequest}.
+	 * Uses a caller-supplied {@code batchInstanceId} (typically a UUID) instead of a
+	 * millisecond-precision timestamp so that two batches created in the same millisecond
+	 * for the same merchant will never share the same temporary file path.
+	 *
+	 * @param merchantId      the merchant ID for this batch
+	 * @param lbfr            the parent {@link CnpBatchFileRequest}
+	 * @param batchInstanceId a unique identifier to incorporate into the temp file name
+	 * @throws CnpBatchException if JAXB cannot be initialised or the per-batch limit is exceeded
+	 */
+	CnpBatchRequest(String merchantId, CnpBatchFileRequest lbfr, String batchInstanceId) throws CnpBatchException {
+		this.batchRequest = new BatchRequest();
+		this.batchRequest.setMerchantId(merchantId);
+		this.batchRequest.setMerchantSdk(Versions.SDK_VERSION);
+		this.objFac = new ObjectFactory();
+		this.lbfr = lbfr;
+		File tmpFile = new File(lbfr.getConfig().getProperty("batchRequestFolder") + "/tmp");
+		if (!tmpFile.exists()) {
+			tmpFile.mkdir();
+		}
+		filePath = lbfr.getConfig().getProperty("batchRequestFolder") + "/tmp/Transactions-" + merchantId + "-" + batchInstanceId;
+		numOfTxn = 0;
+		try {
+			this.jc = JAXBContext.newInstance("io.github.vantiv.sdk.generate");
+			marshaller = jc.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		} catch (JAXBException e) {
+			throw new CnpBatchException("Unable to load jaxb dependencies.  Perhaps a classpath issue?", e);
+		}
+		this.maxTransactionsPerBatch = Integer.parseInt(lbfr.getConfig().getProperty("maxTransactionsPerBatch", "10000"));
+		if (maxTransactionsPerBatch > cnpLimit_maxTransactionsPerBatch) {
+			throw new CnpBatchException("maxTransactionsPerBatch property value cannot exceed " + String.valueOf(cnpLimit_maxTransactionsPerBatch));
+		}
 	}
 
 	/**
