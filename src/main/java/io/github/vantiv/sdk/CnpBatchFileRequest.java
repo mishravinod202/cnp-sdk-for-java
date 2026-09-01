@@ -645,24 +645,24 @@ public class CnpBatchFileRequest{
                 File tmpDir = new File(writeFolderPath + "/tmp");
                 tmpDir.mkdirs();
                 tempBatchRequestFile = new File(tmpDir, "tempBatch-" + instanceId);
-                OutputStream batchReqWriter = new FileOutputStream(tempBatchRequestFile.getAbsoluteFile());
                 byte[] readData = new byte[1024];
-                for (CnpBatchRequest batchReq : cnpBatchRequestList) {
-                    batchReq.closeFile();
-                    String batchRequestXml = buildBatchRequestXml(batchReq);
-                    batchRequestXml = batchRequestXml.replaceFirst("/>", ">");
-                    FileInputStream fis = new FileInputStream(batchReq.getFile());
-                    batchReqWriter.write(batchRequestXml.getBytes());
-                    int i = fis.read(readData);
-                    while (i != -1) {
-                        batchReqWriter.write(readData, 0, i);
-                        i = fis.read(readData);
+                try (OutputStream batchReqWriter = new FileOutputStream(tempBatchRequestFile.getAbsoluteFile())) {
+                    for (CnpBatchRequest batchReq : cnpBatchRequestList) {
+                        batchReq.closeFile();
+                        String batchRequestXml = buildBatchRequestXml(batchReq);
+                        batchRequestXml = batchRequestXml.replaceFirst("/>", ">");
+                        batchReqWriter.write(batchRequestXml.getBytes());
+                        try (FileInputStream fis = new FileInputStream(batchReq.getFile())) {
+                            int i = fis.read(readData);
+                            while (i != -1) {
+                                batchReqWriter.write(readData, 0, i);
+                                i = fis.read(readData);
+                            }
+                        }
+                        batchReqWriter.write(("</batchRequest>\n").getBytes());
+                        batchReq.getFile().delete();
                     }
-                    batchReqWriter.write(("</batchRequest>\n").getBytes());
-                    fis.close();
-                    batchReq.getFile().delete();
                 }
-                batchReqWriter.close();
                 generateRequestFile();
                 // Do NOT delete the tmp directory here — other concurrent instances
                 // may still need it. The individual temp file is deleted inside
