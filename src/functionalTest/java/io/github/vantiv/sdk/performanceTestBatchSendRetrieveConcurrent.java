@@ -41,7 +41,7 @@ public class performanceTestBatchSendRetrieveConcurrent {
 
     private List<BatchSendRetrieveThread> testPool = new ArrayList<BatchSendRetrieveThread>();
 
-    static String merchantId = "07103229";
+    static String merchantId = "1288791";
 
     public static void main(String[] args) throws Exception {
         performanceTestBatchSendRetrieveConcurrent test =
@@ -50,7 +50,7 @@ public class performanceTestBatchSendRetrieveConcurrent {
     }
 
     public performanceTestBatchSendRetrieveConcurrent() {
-        for (int x = 0; x < 50; x++) {
+        for (int x = 0; x < 3; x++) {
             BatchSendRetrieveThread t = new BatchSendRetrieveThread(1000 + x);
             testPool.add(t);
         }
@@ -96,7 +96,7 @@ public class performanceTestBatchSendRetrieveConcurrent {
         private static final int FILES_PER_THREAD = 1;
 
         /** Transactions added to each batch file. */
-        private static final int TRANSACTIONS_PER_FILE = 50000;
+        private static final int TRANSACTIONS_PER_FILE = 1;
 
         private Properties config;
 
@@ -202,13 +202,13 @@ public class performanceTestBatchSendRetrieveConcurrent {
 
                 // Step 2 – retrieve only
                 try {
-                    /*CnpBatchFileResponse fileResponse = batchFile.retrieveOnlyFromCnpSFTPConcurrent();
+                    CnpBatchFileResponse fileResponse = batchFile.retrieveOnlyFromCnpSFTPConcurrent();
                     boolean cycleSuccess = drainResponse(fileResponse);
                     if (cycleSuccess) {
                         successCount++;
                     } else {
                         failedCount++;
-                    }*/
+                    }
                 } catch (CnpBatchException e) {
                     retrFailCount++;
                     failedCount++;

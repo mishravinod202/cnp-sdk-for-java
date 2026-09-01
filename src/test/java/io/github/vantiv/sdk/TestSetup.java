@@ -155,6 +155,7 @@ public class TestSetup {
         customInputSequence += System.lineSeparator(); // SFTP username
         customInputSequence += System.lineSeparator(); // SFTP password
         customInputSequence += System.lineSeparator(); // SFTP timeout
+        customInputSequence += System.lineSeparator(); // SFTP sftpPollIntervalMillis
         customInputSequence += System.lineSeparator(); // proxy host
         customInputSequence += System.lineSeparator(); // proxy port
         customInputSequence += "y" + System.lineSeparator(); // PGP encryption mode

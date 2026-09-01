@@ -176,7 +176,7 @@ public class TestCnpBatchFileRequest {
         File requestFile = cnpBatchFileRequest.getFile();
         assertNotNull(requestFile);
         assertEquals("testFile.xml", requestFile.getName());
-        assertTrue(requestFile.getPath().contains("test/unit"));
+        assertTrue(requestFile.getPath().contains("test" + File.separator + "unit"));
     }
 
     @Test
@@ -184,7 +184,7 @@ public class TestCnpBatchFileRequest {
         File file = cnpBatchFileRequest.getFileToWrite("batchRequestFolder");
         assertNotNull(file);
         assertEquals("testFile.xml", file.getName());
-        assertTrue(file.getParentFile().getPath().contains("test/unit"));
+        assertTrue(file.getParentFile().getPath().contains("test" + File.separator + "unit"));
     }
 
     @Test
