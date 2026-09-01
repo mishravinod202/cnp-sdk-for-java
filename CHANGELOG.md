@@ -1,5 +1,14 @@
 # Vantiv eCommerce CNP CHANGELOG
 
+## Change Log for 12.51.1 (September 1, 2026)
+
+- Change: Added thread-safe concurrent batch API to `CnpBatchFileRequest` with 9 new methods (`createBatchConcurrent`, `prepareForDeliveryConcurrent`, `sendOnlyToCnpSFTPConcurrent`, `sendToCnpSFTPConcurrent`, `retrieveOnlyFromCnpSFTPConcurrent` and their `ExecutorService` async overloads) allowing multiple batch files to be generated and sent concurrently without colliding on shared temp file resources.
+- Change: Added thread-safe constructor to `CnpBatchRequest` that accepts a caller-supplied `batchInstanceId` (UUID) for unique temp file paths, eliminating millisecond-timestamp collisions under concurrent load.
+- Change: Added configurable SFTP poll interval via new property `sftpPollIntervalMillis` (default: `45000` ms). Previously hardcoded in `Communication`. Added to `Setup` wizard and `allProperties` in `CnpBatchFileRequest`.
+- Change: `PgpHelper` now registers `BouncyCastleProvider` once in a `static` initializer instead of on every `encryptionStream`, `decryptionStream`, and `encryptString` call, reducing JVM security provider lock contention under concurrent encryption.
+- Change: `prepareForDeliveryConcurrent()` uses try-with-resources for `FileOutputStream` and `FileInputStream` to ensure streams are closed on exception.
+- Change: Added performance test applications `performanceTestBatchConcurrent` and `performanceTestBatchSendRetrieveConcurrent` for concurrent batch load testing.
+
 ## Change Log for 12.51 (July 27, 2026)
 
 - Change: Upgraded SDK to cnpAPI v12.51.
